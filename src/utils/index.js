@@ -1,4 +1,4 @@
-function formatNumber (n) {
+export function formatNumber (n) {
   const str = n.toString()
   return str[1] ? str : `0${str}`
 }
@@ -18,7 +18,19 @@ export function formatTime (date) {
   return `${t1} ${t2}`
 }
 
-export default {
-  formatNumber,
-  formatTime
+let width = 750
+export function px2rpx (value, winWidth, isInt) {
+  let newVale = (value * (width / winWidth))
+  if (isInt) {
+    return parseInt(newVale)
+  }
+  return newVale
+}
+
+export function rpx2px (value, winWidth, isInt) {
+  let newVale = (value * (winWidth / width))
+  if (isInt) {
+    return parseInt(newVale)
+  }
+  return newVale
 }

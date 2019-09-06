@@ -1,11 +1,11 @@
 <script>
 export default {
-  log () {
-    console.log(`log at:${Date.now()}`)
+  created () {
+    this.$store.dispatch('getSystemInfo')
+    this.$store.dispatch('getAudioManager')
   }
 }
 </script>
-
-<style>
+<style lang='scss'>
   img{width: 100%;height: 100%;}
 </style>
