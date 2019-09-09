@@ -8,11 +8,12 @@
 import {mapState} from 'vuex'
 import {px2rpx} from '@/utils'
 export default {
+  data () {
+    return {
+      size: 50
+    }
+  },
   props: {
-    size: {
-      type: Number,
-      default: 200
-    },
     borderWidth: {
       type: Number,
       default: 3
@@ -32,7 +33,7 @@ export default {
       if (!this.progressValue) {
         return false
       }
-      let size = this.sizeRpx
+      let size = this.size
       let halfSize = parseInt(size / 2)
       let borderWidth = px2rpx(this.borderWidth, this.systemInfo.windowWidth, true)
       let ctx = wx.createCanvasContext('progress_bar')
@@ -48,20 +49,16 @@ export default {
       ctx.draw()
     },
     getWrapHeight (el) {
-      const query = wx.createSelectorQuery()
+      let query = wx.createSelectorQuery()
       query.select(el).boundingClientRect()
-      query.selectViewport().scrollOffset()
-      query.exec(function (res) {
-        console.log(res)
+      query.exec((res) => {
+        this.size = res[0].height
       })
     }
   },
 
   computed: {
     ...mapState(['systemInfo']),
-    sizeRpx () {
-      return px2rpx(this.size, this.systemInfo.windowWidth, true)
-    },
     progressValue () {
       return (this.currentValue / this.countValue) * 2
     }
@@ -72,12 +69,15 @@ export default {
       if (value <= this.countValue) {
         this.drawProgress()
       }
+    },
+    size (value, oldValue) {
+      this.drawProgress()
     }
   },
 
   created () {
-    this.getWrapHeight()
-    this.drawProgress('.circular_progress')
+    this.getWrapHeight('.circular_progress')
+    this.drawProgress()
   }
 }
 </script>
