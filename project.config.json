@@ -9,8 +9,9 @@
 	},
 	"miniprogramRoot": "dist/wx/",
 	"compileType": "miniprogram",
-	"appid": "wxf1457f85827072ba",
+	"appid": "wxa383598da3f6fc2e",
 	"projectname": "mpvue-music163",
+	"cloudfunctionRoot": "functions/",
 	"simulatorType": "wechat",
 	"simulatorPluginLibVersion": {},
 	"condition": {

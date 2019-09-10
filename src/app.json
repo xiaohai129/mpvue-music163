@@ -1,11 +1,12 @@
 {
   "pages": [
-    "pages/index/main"
+    "pages/player/main"
   ],
   "window": {
     "backgroundTextStyle": "light",
     "navigationBarBackgroundColor": "#fff",
-    "navigationBarTitleText": "WeChat",
+    "navigationBarTitleText": "小海音乐",
     "navigationBarTextStyle": "black"
-  }
+  },
+  "requiredBackgroundModes": ["audio"]
 }
