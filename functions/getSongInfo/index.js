@@ -7,8 +7,19 @@ const db = cloud.database()
 
 // 云函数入口函数
 exports.main = async (event, context) => {
-  let data = await db.collection('songs').get()
-  data = data.data[0]
+  let songid = event.songid
+  let data = []
+  if (songid == 'next'){
+    data = await db.collection('songs').get()
+    let rand = parseInt(Math.random() * 100) % data.data.length
+    console.log(rand)
+    data = data.data[rand]
+  }else{
+    data = await db.collection('songs').where({
+      _id: songid
+    }).get()
+    data = data.data[0]
+  }
   let fileList = await cloud.getTempFileURL({
     fileList: [
       data.musicSrc,

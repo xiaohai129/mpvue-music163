@@ -12,17 +12,20 @@
         <img src="/static/images/player/disc.png">
         <img src="/static/images/player/disc_light.png" class="disc_light"/>
       </div>
-      <div class="play_control_btns">
-        <div class="iconfont icon-shangyishou"></div>
-        <div :class="'iconfont play_btn ' + (isPlay?'icon-zanting':'icon-bofang')"
-              @click='switchPlayStatis'
-        ></div>
-        <div class="iconfont icon-xiayishou"></div>
-      </div>
-      <div class="voice_control_btns">
-        <div class="iconfont icon-yinliang-guan"></div>
-        <xhslider/>
-        <div class="iconfont icon-yinliang-gao"></div>
+      <lyric :lyric='songInfo.lyric' :currentTime='currentValue'/>
+      <div class="control_wrap">
+        <div class="play_control_btns">
+          <div class="iconfont icon-shangyishou"></div>
+          <div :class="'iconfont play_btn ' + (isPlay?'icon-zanting':'icon-bofang')"
+                @click='switchPlayStatis'
+          ></div>
+          <div class="iconfont icon-xiayishou"></div>
+        </div>
+        <div class="voice_control_btns">
+          <div class="iconfont icon-yinliang-guan"></div>
+          <xhslider/>
+          <div class="iconfont icon-yinliang-gao"></div>
+        </div>
       </div>
     </div>
   </div>
@@ -31,41 +34,49 @@
 <script>
 import circularProgress from '@/components/circular_progress'
 import xhslider from '@/components/slider'
+import lyric from '@/components/lyric'
 // import axios from 'axios'
 import {mapState} from 'vuex'
 
 export default {
+
   data () {
     return {
-      songImg: '/static/images/player/109951164217552025.jpg',
-      currentValue: 0,
+      currentValue: 1,
       countValue: 1,
       isPlay: false,
       songInfo: {
         title: '暂无歌曲',
         musicSrc: '',
         singer: '暂无歌手',
-        imgSrc: '',
-        lrc: '',
+        imgSrc: '/static/images/player/disc_default.png',
+        songImg: '/static/images/player/109951164217552025.jpg',
+        lyric: '',
         size: 0
       },
       playTimer: null
     }
   },
   created () {
-    this.play()
+
   },
 
   methods: {
-    play (songid) {
-      wx.cloud.callFunction({ name: 'getSongInfo' }).then(res => {
+    play (songid = 'next') {
+      wx.cloud.callFunction({
+        name: 'getSongInfo',
+        data: {
+          songid: songid
+        }
+      }).then(res => {
         let data = res.result
         this.songInfo = {
           musicSrc: data.musicSrc,
           singer: data.singer,
           imgSrc: data.imgSrc,
           name: data.title,
-          size: data.size
+          size: data.size,
+          lyric: data.lyric
         }
         this.countValue = data.size
         this.audioManager.src = this.songInfo.musicSrc
@@ -80,9 +91,13 @@ export default {
       this.isPlay = false
     },
     switchPlayStatis () {
-      if (this.audioManager.paused) {
-        this.audioManager.play()
-        this.isPlay = true
+      if (this.audioManager.paused || !this.isPlay) {
+        if (this.audioManager.src && this.audioManager.src.length > 0) {
+          this.audioManager.play()
+          this.isPlay = true
+        } else {
+          this.play()
+        }
       } else {
         this.pause()
       }
@@ -91,15 +106,16 @@ export default {
 
   components: {
     circularProgress,
-    xhslider
+    xhslider,
+    lyric
   },
 
   watch: {
     isPlay (value, oldValue) {
       if (value) {
         this.playTimer = setInterval(() => {
-          this.currentValue = parseInt(this.audioManager.currentTime)
-        }, 1000)
+          this.currentValue = this.audioManager.currentTime
+        }, 200)
       } else {
         clearInterval(this.playTimer)
       }
@@ -125,6 +141,7 @@ export default {
   width: 100%;
   height: 100%;
   position: fixed;
+  overflow: hidden;
   top: 0;
   left: 0;
   // 音乐播放状态
@@ -153,7 +170,10 @@ export default {
     }
   }
   .player_content_box{
-    position: relative;
+    position: absolute;
+    width: 100%;
+    top: 0;
+    left: 0;
     z-index: 5;
     .disc_box{
       width: 300px;
@@ -161,7 +181,6 @@ export default {
       margin: 70px auto 0 auto;
       background: no-repeat center center;
       background-size: 194px 194px;
-      position: relative;
       animation: played 15s linear infinite;
       animation-play-state:paused;
       .disc_light{
@@ -170,6 +189,11 @@ export default {
         left: 0;
         z-index: 8;
       }
+    }
+    .control_wrap{
+      position: fixed;
+      bottom: 0;
+      padding-bottom: 15px;
     }
     .play_control_btns{
       color: #fff;
@@ -215,13 +239,12 @@ export default {
 </style>
 <style lang="scss">
 .circular_progress{
-  width: 295px;
-  height: 295px;
-  position: absolute;
+  width: 290px;
+  height: 290px;
   z-index: 7;
-  top:3px;
-  left: 50%;
-  transform: translate(-50%);
+  position: absolute;
+  top: 74px;
+  left: 44px;
 }
 .xh_slider{
   width: 280px;
