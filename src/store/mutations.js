@@ -8,5 +8,8 @@ export default {
   },
   [type.GET_AUDIOMANAGER] (state, value) {
     state.audioManager = value
+  },
+  [type.GET_TOPBARHEIGHT] (state, value) {
+    state.topbarHeight = value
   }
 }

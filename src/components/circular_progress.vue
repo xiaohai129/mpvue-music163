@@ -71,6 +71,9 @@ export default {
   computed: {
     ...mapState(['systemInfo']),
     progressValue () {
+      if (this.countValue <= 0) {
+        return 0
+      }
       return (this.currentValue / this.countValue) * 2
     }
   },

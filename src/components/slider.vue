@@ -1,6 +1,6 @@
 <template>
-  <div class="wrap" @touchmove='setCurrentValue'>
-    <div class="slider_wrap xh_slider" :style="{height:height+'rpx'}">
+  <div class="wrap xh_slider" @touchmove='setCurrentValue' :style="{marginTop:height+'rpx'}">
+    <div class="slider_wrap" :style="{height:height+'rpx'}">
       <div class="round_block" :style="{left:cvalue+'%'}"></div>
       <div class="current_value" :style="{width:cvalue+'%'}"></div>
     </div>
@@ -11,8 +11,6 @@
 export default {
   data () {
     return {
-      countValue: 1,
-      currentValue: 0,
       width: 0
     }
   },
@@ -24,6 +22,14 @@ export default {
     },
     onChange: {
       type: Function
+    },
+    countValue: {
+      type: Number,
+      default: 1
+    },
+    currentValue: {
+      type: Number,
+      default: 0
     }
   },
 
@@ -57,7 +63,10 @@ export default {
 
   computed: {
     cvalue () {
-      return this.currentValue / this.countValue * 100
+      if (this.countValue <= 0) {
+        return 0
+      }
+      return (this.currentValue / this.countValue * 100).toFixed(2)
     }
   }
 }

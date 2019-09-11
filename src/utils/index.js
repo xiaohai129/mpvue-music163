@@ -18,6 +18,17 @@ export function formatTime (date) {
   return `${t1} ${t2}`
 }
 
+function strAdd0 (value) {
+  if (parseInt(value) < 10) {
+    return `0${value}`
+  }
+  return value
+}
+
+export function getSongTimeStr (time) {
+  return strAdd0(parseInt(time / 60)) + ':' + strAdd0(time % 60)
+}
+
 let width = 750
 export function px2rpx (value, winWidth, isInt) {
   let newVale = (value * (width / winWidth).toFixed(2))

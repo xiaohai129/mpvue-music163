@@ -1,6 +1,7 @@
 export default {
   state: {
     systemInfo: {},
-    audioManager: null
+    audioManager: null,
+    topbarHeight: 0
   }
 }

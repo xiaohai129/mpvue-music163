@@ -1,4 +1,6 @@
 {
   "disableScroll": true,
-  "navigationBarTitleText": "小海音乐"
+  "navigationBarTitleText": "小海音乐",
+  "navigationStyle": "custom",
+  "navigationBarTextStyle": "white"
 }

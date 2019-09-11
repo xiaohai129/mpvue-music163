@@ -15,7 +15,7 @@ export default {
     return {
       lyricArr: [{
         time: '',
-        text: '小海音乐'
+        text: 'X音乐'
       }, {
         time: '',
         text: '欢迎您'

@@ -3,6 +3,7 @@ export default {
   created () {
     this.$store.dispatch('getSystemInfo')
     this.$store.dispatch('getAudioManager')
+    this.$store.dispatch('getTopbarHeight')
   }
 }
 </script>
@@ -49,6 +50,6 @@ export default {
     content: "\e602";
   }
 
-
+  page,.layout{height: 100%;}
   img{width: 100%;height: 100%;}
 </style>
