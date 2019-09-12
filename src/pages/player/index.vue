@@ -8,11 +8,14 @@
         <div class="mask_black"></div>
       </div>
       <div class="player_content_box" :style="playerStyle">
-        <img src="/static/images/player/needle.png" class="needle"/>
         <div class="controlTime" v-show="isShowControlTime">{{controlValueStr}}</div>
         <circularProgress 
           :currentValue='currentValue' 
           :countValue='countValue' />
+        <div class="needle" >
+          <cover-image src='/static/images/player/needle_dot.png' class="dot"/>
+          <canvas canvas-id='needle_canvas'></canvas>
+        </div>
         <div class="disc_box" :style="{backgroundImage:'url(' + (songInfo.imgSrc||'') + ')'}">
           <img src="/static/images/player/disc.png"/>
           <img src="/static/images/player/disc_light.png" class="disc_light"/>
@@ -59,8 +62,8 @@ export default {
 
   data () {
     return {
-      currentValue: 12,
-      countValue: 120,
+      currentValue: 0,
+      countValue: 0,
       controlValue: 0,
       isShowControlTime: false,
       isPlay: false,
@@ -75,7 +78,10 @@ export default {
       playTimer: null,
       playList: [],
       playIndex: 0,
-      ShowControlTimer: null
+      limitClickTime: null, // 限制疯狂点击
+      ShowControlTimer: null,
+      needleTimer: null,
+      timer: null
     }
   },
 
@@ -110,6 +116,9 @@ export default {
       this.isPlay = false
     },
     next () {
+      if (this.limitClick()) {
+        return false
+      }
       if (this.playIndex < this.playList.length) {
         this.playIndex++
       } else {
@@ -118,6 +127,9 @@ export default {
       this.play()
     },
     prev () {
+      if (this.limitClick()) {
+        return false
+      }
       if (this.playIndex > 0) {
         this.playIndex--
       } else {
@@ -160,6 +172,50 @@ export default {
         }
         this.playList = playList
       })
+    },
+    showNeedleImg (value) {
+      let ctx = wx.createCanvasContext('needle_canvas')
+      let needleImg = '/static/images/player/needle.png'
+      let degrees = -31
+      if (typeof (value) === 'undefined') {
+        value = -1
+      } else {
+        if (value === 1) {
+          degrees = -30
+        } else {
+          degrees = 0
+        }
+      }
+      clearInterval(this.needleTimer)
+      this.needleTimer = setInterval(() => {
+        ctx.rotate(degrees * Math.PI / 180)
+        ctx.clearRect(0, 0, 150, 150)
+        ctx.drawImage(needleImg, 2, 10, 90, 134)
+        ctx.draw()
+        degrees += value
+        if (value === 1 && degrees > 0) {
+          clearInterval(this.needleTimer)
+        } else if (value === -1 && degrees < -30) {
+          clearInterval(this.needleTimer)
+        }
+      }, 25)
+    },
+    limitClick () {
+      let time = new Date().getTime()
+      if ((time - this.limitClickTime) <= 2000) {
+        this.limitClickTime = time
+        wx.showToast({
+          title: '亲！慢慢来~',
+          icon: 'none'
+        })
+        clearTimeout(this.timer)
+        this.timer = clearTimeout(() => {
+          wx.hideToast()
+        }, 2000)
+        return true
+      }
+      this.limitClickTime = time
+      return false
     }
   },
 
@@ -173,17 +229,19 @@ export default {
   watch: {
     isPlay (value, oldValue) {
       if (value) {
+        this.showNeedleImg(1)
         this.playTimer = setInterval(() => {
           this.currentValue = this.audioManager.currentTime
         }, 200)
       } else {
         clearInterval(this.playTimer)
+        this.showNeedleImg(-1)
       }
     }
   },
 
   computed: {
-    ...mapState(['audioManager', 'topbarHeight']),
+    ...mapState(['audioManager', 'topbarHeight', 'systemInfo']),
     playerStyle () {
       return `
         height:calc(100% - ${this.topbarHeight + 10}px)
@@ -208,6 +266,10 @@ export default {
     this.audioManager.onEnded(() => {
       this.next()
     })
+  },
+
+  mounted () {
+    this.showNeedleImg()
   },
 
   onHide () {
@@ -259,9 +321,6 @@ export default {
   &.played{
     .disc_box{
       animation-play-state:running !important;
-    }
-    .needle{
-      transform: rotate(4deg) !important;
     }
   }
   .player_mask{
@@ -352,16 +411,25 @@ export default {
       }
     }
     .needle{
-      width: 90px;
-      height: 130px;
+      width: 150px;
+      height: 150px;
       position: absolute;
       left: 50%;
       top: 0;
       z-index: 20;
       margin-left: -14px;
-      transform: rotate(-30deg);
-      transform-origin: 16px 12px; 
-      transition: transform 0.5s ease-in;
+      .dot{
+        width: 30PX;
+        height: 30PX;
+        position: absolute;
+        top: -15PX;
+        left: 0PX;
+        z-index: 10;
+      }
+      canvas{
+        width:100%;
+        height: 100%;
+      }
     }
   }
 }
