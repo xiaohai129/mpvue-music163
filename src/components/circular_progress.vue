@@ -1,6 +1,5 @@
 <template>
   <div class="circular_progress">
-    <img :src="canvasImg" class="canvas_img"/>
     <canvas class="progress_bar" canvas-id="progress_bar">  </canvas> 
   </div>
 </template>
@@ -11,8 +10,7 @@ import {px2rpx} from '@/utils'
 export default {
   data () {
     return {
-      size: 50,
-      canvasImg: ''
+      size: 50
     }
   },
   props: {
@@ -29,7 +27,6 @@ export default {
       default: 1
     }
   },
-
   methods: {
     drawProgress () {
       if (!this.progressValue) {
@@ -49,7 +46,6 @@ export default {
       ctx.arc(halfSize, halfSize, halfSize - borderWidth, 0, this.progressValue * Math.PI, false)
       ctx.stroke()
       ctx.draw()
-      this.canvasToTempImage()
     },
     getWrapHeight (el) {
       let query = wx.createSelectorQuery()
@@ -67,7 +63,6 @@ export default {
       })
     }
   },
-
   computed: {
     ...mapState(['systemInfo']),
     progressValue () {
@@ -77,7 +72,6 @@ export default {
       return (this.currentValue / this.countValue) * 2
     }
   },
-
   watch: {
     currentValue (value, oldValue) {
       if (value <= this.countValue) {
@@ -88,7 +82,6 @@ export default {
       this.drawProgress()
     }
   },
-
   created () {
     this.getWrapHeight('.circular_progress')
     this.drawProgress()
@@ -103,13 +96,6 @@ export default {
     position: relative;
     overflow: hidden;
     .progress_bar{
-      width: 100%;
-      height: 100%;
-      opacity: 0;
-      position: absolute;
-      top:-10000px;
-    }
-    .canvas_img{
       width: 100%;
       height: 100%;
     }

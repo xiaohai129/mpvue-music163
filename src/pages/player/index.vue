@@ -8,15 +8,20 @@
         <div class="mask_black"></div>
       </div>
       <div class="player_content_box" :style="playerStyle">
-        <img src="/static/images/player/needle.png" class="needle">
+        <img src="/static/images/player/needle.png" class="needle"/>
+        <div class="controlTime" v-show="isShowControlTime">{{controlValueStr}}</div>
         <circularProgress 
           :currentValue='currentValue' 
           :countValue='countValue' />
         <div class="disc_box" :style="{backgroundImage:'url(' + (songInfo.imgSrc||'') + ')'}">
-          <img src="/static/images/player/disc.png">
+          <img src="/static/images/player/disc.png"/>
           <img src="/static/images/player/disc_light.png" class="disc_light"/>
         </div>
-        <lyric :lyric='songInfo.lyric' :currentTime='currentValue'/>
+        <lyric 
+          :lyric='songInfo.lyric' 
+          :currentTime='currentValue'
+          ref="lyric"
+        />
         <div class="control_wrap">
           <div class="play_control_btns">
             <div class="iconfont icon-shangyishou" @click="prev"></div>
@@ -27,7 +32,12 @@
           </div>
           <div class="play_progress">
             <span>{{currentValueStr}}</span>
-            <xhslider :countValue='countValue' :currentValue='currentValue'/>
+            <xhslider 
+              :countValue='countValue' 
+              :currentValue='currentValue'
+              @changeEnd='seek'
+              @change='sliderChange'
+            />
             <span>{{countValueStr}}</span>
           </div>
         </div>
@@ -49,20 +59,23 @@ export default {
 
   data () {
     return {
-      currentValue: 0,
-      countValue: 0,
-      isPlay: true,
+      currentValue: 12,
+      countValue: 120,
+      controlValue: 0,
+      isShowControlTime: false,
+      isPlay: false,
       songInfo: {
         title: 'X音乐',
         musicSrc: '',
         singer: '',
-        imgSrc: '/static/images/player/disc_default.png',
+        imgSrc: 'https://6d75-music163-4rnnj-1300176346.tcb.qcloud.la/images/disc_default.png?sign=835e1a26b0c711d26b8238c49823a1cf&t=1568257707',
         lyric: '',
         size: 0
       },
       playTimer: null,
       playList: [],
-      playIndex: 0
+      playIndex: 0,
+      ShowControlTimer: null
     }
   },
 
@@ -80,7 +93,7 @@ export default {
           musicSrc: data.musicSrc,
           singer: data.singer,
           imgSrc: data.imgSrc,
-          name: data.title,
+          title: data.title,
           size: data.size,
           lyric: data.lyric
         }
@@ -88,7 +101,7 @@ export default {
         this.audioManager.src = this.songInfo.musicSrc
         this.audioManager.singer = this.songInfo.singer
         this.audioManager.coverImgUrl = this.songInfo.imgSrc
-        this.audioManager.title = this.songInfo.name
+        this.audioManager.title = this.songInfo.title
         this.isPlay = true
       })
     },
@@ -111,6 +124,18 @@ export default {
         this.playIndex = this.playList.length - 1
       }
       this.play()
+    },
+    seek (time) {
+      this.audioManager.seek(time)
+      this.$refs.lyric.findLyricIndex(time)
+    },
+    sliderChange (time) {
+      clearTimeout(this.ShowControlTimer)
+      this.isShowControlTime = true
+      this.controlValue = time
+      this.ShowControlTimer = setTimeout(() => {
+        this.isShowControlTime = false
+      }, 2000)
     },
     switchPlayStatis () {
       if (this.audioManager.paused || !this.isPlay) {
@@ -169,11 +194,30 @@ export default {
     },
     countValueStr () {
       return getSongTimeStr(this.countValue)
+    },
+    controlValueStr () {
+      return getSongTimeStr(this.controlValue)
     }
   },
 
   created () {
     this.getPlayList()
+    this.audioManager.onStop(() => {
+      this.isPlay = false
+    })
+    this.audioManager.onEnded(() => {
+      this.next()
+    })
+  },
+
+  onHide () {
+    this.isPlay = false
+  },
+
+  onShow () {
+    if (this.audioManager.paused && !this.audioManager.paused) {
+      this.isPlay = true
+    }
   }
 }
 </script>
@@ -185,6 +229,22 @@ export default {
   }
   to{
     transform: rotate(360deg);
+  }
+}
+@keyframes hide {
+  0%{
+    display: block;
+  }
+  100%{
+    display: none !important;
+  }
+}
+@keyframes show {
+  0%{
+    display: none;
+  }
+  100%{
+    display: block !important;
   }
 }
 
@@ -201,7 +261,7 @@ export default {
       animation-play-state:running !important;
     }
     .needle{
-      transform: rotate(8deg) !important;
+      transform: rotate(4deg) !important;
     }
   }
   .player_mask{
@@ -226,6 +286,22 @@ export default {
     left: 0;
     bottom: 0;
     z-index: 10;
+    .controlTime{
+      transform: display .5s ease-in;
+      position: absolute;
+      top: 122px;
+      width: 196px;
+      height: 196px;
+      line-height: 200px;
+      text-align: center;
+      background: rgba($color: #000, $alpha: 0.8);
+      font-size: 20px;
+      color: #fff;
+      z-index: 4;
+      border-radius: 50%;
+      left: 50%;
+      margin-left: -98px;
+    }
     .disc_box{
       width: 300px;
       height: 300px;
@@ -276,14 +352,14 @@ export default {
       }
     }
     .needle{
-      width: 90px;height: 130px;
+      width: 90px;
+      height: 130px;
       position: absolute;
       left: 50%;
       top: 0;
       z-index: 20;
-      transform: rotate(-30deg);
       margin-left: -14px;
-      margin-top: -5px;
+      transform: rotate(-30deg);
       transform-origin: 16px 12px; 
       transition: transform 0.5s ease-in;
     }
@@ -297,7 +373,7 @@ export default {
   z-index: 0;
   position: absolute !important;
   top: 75px;
-  left: 43px;
+  left: 44px;
 }
 .xh_slider{
   width: 250px !important;

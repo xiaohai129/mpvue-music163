@@ -25,8 +25,8 @@ function strAdd0 (value) {
   return value
 }
 
-export function getSongTimeStr (time) {
-  return strAdd0(parseInt(time / 60)) + ':' + strAdd0(time % 60)
+export function getSongTimeStr (time = 0) {
+  return strAdd0(parseInt(time / 60)) + ':' + strAdd0(parseInt(time % 60))
 }
 
 let width = 750

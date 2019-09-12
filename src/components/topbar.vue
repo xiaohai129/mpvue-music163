@@ -1,6 +1,6 @@
 <template>
   <div 
-    :class="[TextStyle=='block'?'black':'','topbar_wrap']" 
+    :class="[TextStyle,'topbar_wrap']" 
     :style="topbarStyle"
   >
     <div class="title"><slot>{{title}}</slot></div>
@@ -29,7 +29,6 @@ export default {
     height: 42PX;
     line-height: 42PX;
     width: 100%;
-    background: rgba($color: #000000, $alpha: 0.6);
     position: fixed;
     top: 0;
     left: 0;
@@ -38,6 +37,10 @@ export default {
     text-align: center;
     &.black{
       color: #000 !important;
+      background: #000000;
+    }
+    &.white{
+      background: #fff;      
     }
     .title{
       font-size: 14PX;

@@ -36,6 +36,10 @@ export default {
       let odate = new Date(value)
       return `${odate.getMinutes()}:${odate.getSeconds()}.${odate.getMilliseconds()}`
     },
+    getTimeValue (value) {
+      let aTime = value.split(':')
+      return (parseInt(aTime[0]) * 60) + parseFloat(aTime[1])
+    },
     getLyricInfo () {
       this.lyricIndex = 0
       this.lyricArr = []
@@ -46,9 +50,38 @@ export default {
         let tIndex = sArr[i].indexOf(']')
         oTemp.time = sArr[i].substr(1, tIndex - 1)
         oTemp.text = sArr[i].substr(tIndex + 1)
-        aLyric.push(oTemp)
+        if (oTemp.time.length > 0) {
+          aLyric.push(oTemp)
+        }
       }
       this.lyricArr = aLyric
+    },
+    findLyricIndex (time) {
+      if (this.lyricIndex >= this.lyricArr.length) {
+        this.lyricIndex--
+      }
+      let currentTime = this.lyricArr[this.lyricIndex].time
+      let direction = 1
+      if (this.getTimeValue(currentTime) > time) {
+        direction = -1
+      }
+      let currentIndex = this.lyricIndex
+      let isFind = false
+      while (!isFind && (currentIndex >= 0 && currentIndex < this.lyricArr.length)) {
+        currentTime = this.getTimeValue(this.lyricArr[currentIndex].time)
+        if (direction === 1 && currentTime > time) {
+          isFind = true
+          this.lyricIndex = currentIndex
+        } else if (direction === -1 && currentTime < time) {
+          isFind = true
+          this.lyricIndex = currentIndex
+        } else {
+          currentIndex += direction
+        }
+      }
+      if (!isFind) {
+        this.lyricIndex = currentIndex
+      }
     }
   },
   watch: {
@@ -57,8 +90,7 @@ export default {
         return false
       }
       let sTime = this.lyricArr[this.lyricIndex].time
-      let aTime = sTime.split(':')
-      let tempTime = (parseInt(aTime[0]) * 60) + parseFloat(aTime[1])
+      let tempTime = this.getTimeValue(sTime)
       if (value > tempTime) {
         this.lyricIndex++
       }

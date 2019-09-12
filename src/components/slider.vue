@@ -1,5 +1,9 @@
 <template>
-  <div class="wrap xh_slider" @touchmove='setCurrentValue' :style="{marginTop:height+'rpx'}">
+  <div class="wrap xh_slider" 
+    @touchmove='setCurrentValue'
+    @touchend='onTouchend'
+    :style="{marginTop:height+'rpx'}"
+  >
     <div class="slider_wrap" :style="{height:height+'rpx'}">
       <div class="round_block" :style="{left:cvalue+'%'}"></div>
       <div class="current_value" :style="{width:cvalue+'%'}"></div>
@@ -11,7 +15,9 @@
 export default {
   data () {
     return {
-      width: 0
+      width: 0,
+      isControl: false,
+      controlValue: 0
     }
   },
 
@@ -19,9 +25,6 @@ export default {
     height: {
       type: Number,
       default: 6
-    },
-    onChange: {
-      type: Function
     },
     countValue: {
       type: Number,
@@ -39,17 +42,18 @@ export default {
 
   methods: {
     setCurrentValue (e, value) {
+      this.isControl = true
       if (value) {
         this.currentValue = value
+        this.controlValue = value
       } else {
         let currentValue = this.countValue / this.width * (e.clientX - e.currentTarget.offsetLeft)
         if (currentValue > this.countValue || currentValue < 0) {
           return false
         }
-        if (this.onChange) {
-          this.onChange(currentValue)
-        }
         this.currentValue = currentValue
+        this.controlValue = currentValue
+        this.$emit('change', currentValue)
       }
     },
     getWrapHeight () {
@@ -58,6 +62,10 @@ export default {
       query.exec((res) => {
         this.width = res[0].width
       })
+    },
+    onTouchend () {
+      this.isControl = false
+      this.$emit('changeEnd', this.controlValue)
     }
   },
 
@@ -66,9 +74,14 @@ export default {
       if (this.countValue <= 0) {
         return 0
       }
-      return (this.currentValue / this.countValue * 100).toFixed(2)
+      let currentValue = this.currentValue
+      if (this.isControl) {
+        currentValue = this.controlValue
+      }
+      return (currentValue / this.countValue * 100).toFixed(2)
     }
   }
+
 }
 </script>
 
