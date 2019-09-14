@@ -124,6 +124,13 @@ let baseWebpackConfig = {
         to: path.resolve(config.build.assetsRoot, './static'),
         ignore: ['.*']
       }
+    ]),
+    new CopyWebpackPlugin([
+      {
+        from: path.resolve(__dirname, '../src/custom-tab-bar'),
+        to: path.resolve(config.build.assetsRoot, './custom-tab-bar'),
+        ignore: ['.*']
+      }
     ])
   ]
 }

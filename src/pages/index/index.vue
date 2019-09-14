@@ -1,5 +1,5 @@
 <template>
-  <div class="layout_wrap">
+  <div class="layout">
   </div>
 </template>
 
@@ -14,11 +14,14 @@ export default {
   components: {
   },
 
-  created () {
+  mounted () {
+  },
+  onShow () {
+    wx.showTabBar()
+    this.$mp.page.getTabBar().updateTabbarStatus('index')
   }
 }
 </script>
 
 <style scoped>
-
 </style>

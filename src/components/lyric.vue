@@ -1,5 +1,5 @@
 <template>
-  <div class="lyric_wrap">
+  <div :class="['lyric_wrap',showStatus=='full'?'full_lyric_wrap':'']" @click="showModeSwitch">
     <ul class="lyric_list" :style="{top:topValue}">
       <li v-for="(item, index) in lyricArr" :key="index" time :class="(lyricIndex-1)==index?'current':''">
         {{item.text}}
@@ -20,7 +20,8 @@ export default {
         time: '',
         text: '欢迎您'
       }],
-      lyricIndex: 1
+      lyricIndex: 1,
+      showStatus: 'small' // small:小模式  full:全屏模式
     }
   },
   props: {
@@ -82,6 +83,14 @@ export default {
       if (!isFind) {
         this.lyricIndex = currentIndex
       }
+    },
+    showModeSwitch () {
+      if (this.showStatus === 'small') {
+        this.showStatus = 'full'
+      } else {
+        this.showStatus = 'small'
+      }
+      this.$emit('change', this.showStatus)
     }
   },
   watch: {
@@ -102,7 +111,11 @@ export default {
   computed: {
     ...mapState(['systemInfo']),
     topValue () {
-      return (-this.lyricIndex * 28) + 'px'
+      if (this.showStatus === 'small') {
+        return (-this.lyricIndex * 28) + 'px'
+      } else {
+        return ((-this.lyricIndex + 4) * 28) + 'px'
+      }
     }
   }
 }
@@ -133,6 +146,13 @@ export default {
         font-size: 16PX;
         text-shadow: 0 0 2px #000;
       }
+    }
+    &.full_lyric_wrap{
+      position: absolute;
+      top: 0;
+      left: 0;
+      height: calc(100% - 165px);
+      margin: 0;
     }
   }
 </style>

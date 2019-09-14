@@ -1,12 +1,32 @@
 {
   "pages": [
-    "pages/player/main"
+    "pages/index/main",
+    "pages/player/main",
+    "pages/mine/main"
   ],
   "window": {
     "backgroundTextStyle": "light",
     "navigationBarBackgroundColor": "#fff",
-    "navigationBarTitleText": "小海音乐",
+    "navigationBarTitleText": "X音乐",
     "navigationBarTextStyle": "black"
   },
-  "requiredBackgroundModes": ["audio"]
+  "requiredBackgroundModes": ["audio"],
+  "tabBar": {
+    "custom": true,
+    "color": "#9e9e9e",
+    "selectedColor": "#000000",
+    "list": [{
+      "pagePath": "pages/index/main",
+      "text": "发现",
+      "iconPath": "/static/tabs/icon_find_n.png",
+      "selectedIconPath": "/static/tabs/icon_find_a.png"
+    }, {
+      "pagePath": "pages/player/main"
+    },{
+      "pagePath": "pages/mine/main",
+      "text": "我的",
+      "iconPath": "/static/tabs/icon_mine_n.png",
+      "selectedIconPath": "/static/tabs/icon_mine_a.png"
+    }]
+  }
 }

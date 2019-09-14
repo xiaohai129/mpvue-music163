@@ -109,6 +109,7 @@ export default {
     background-color: $font-main-color;
     background: $main-color;
     overflow: hidden;
+    border-radius: 3px;
   }
 }
 </style>

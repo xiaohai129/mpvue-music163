@@ -1,0 +1,21 @@
+<view class='tabbar_wrap' wx:if="{{isShow}}">
+  <view class='decorative_line'>
+    <view class='left line'></view>
+    <view class='right line'></view>
+  </view>
+  <view class="tabbar_layout">
+    <view class='tabbar_item {{selectIndex==0?"item_selected":""}}' data-index='0' bindtap='gotoPage'>
+      <image class="item_icon" src="{{list[0].iconPath}}"/>
+      <image class="item_icon" src="{{list[0].selectedIconPath}}"/>
+      {{list[0].text}}
+    </view>
+    <view class='tabbar_item player-min' data-index='1' bindtap='gotoPage'>
+      <image class='song_img {{isPlay?"playing":""}}' src="{{songImg}}" />
+    </view>
+    <view class='tabbar_item {{selectIndex==2?"item_selected":""}}' data-index='2' bindtap='gotoPage'>
+      <image class="item_icon" src="{{list[2].iconPath}}"/>
+      <image class="item_icon" src="{{list[2].selectedIconPath}}"/>
+      {{list[2].text}}
+    </view>
+  </view>
+</view>

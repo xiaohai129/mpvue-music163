@@ -25,11 +25,15 @@ export default {
     countValue: {
       type: Number,
       default: 1
+    },
+    isShow: {
+      type: Boolean,
+      default: true
     }
   },
   methods: {
     drawProgress () {
-      if (!this.progressValue) {
+      if (!this.progressValue || !this.isShow) {
         return false
       }
       let size = this.size

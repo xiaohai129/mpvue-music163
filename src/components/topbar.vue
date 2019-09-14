@@ -3,20 +3,32 @@
     :class="[TextStyle,'topbar_wrap']" 
     :style="topbarStyle"
   >
+    <div class='iconfont icon-back' 
+      v-show="isBack"
+      @click="gotoHomePage"
+    ></div>
     <div class="title"><slot>{{title}}</slot></div>
+    <div class="iconfont" v-show="isBack"></div>
   </div>
 </template>
 
 <script>
 import {mapState} from 'vuex'
 export default {
-  props: ['title', 'TextStyle'],
+  props: ['title', 'TextStyle', 'isBack'],
   computed: {
     ...mapState(['topbarHeight', 'systemInfo']),
     topbarStyle () {
       return `
-        padding-top: ${this.systemInfo.statusBarHeight}px
+        padding-top: ${this.systemInfo.statusBarHeight}PX
       `
+    }
+  },
+  methods: {
+    gotoHomePage () {
+      wx.switchTab({
+        url: '/pages/index/main'
+      })
     }
   },
   created () {
@@ -35,6 +47,8 @@ export default {
     z-index: 1000;
     color: #fff;
     text-align: center;
+    display: flex;
+    justify-content: space-between;
     &.black{
       color: #000 !important;
       background: #000000;
@@ -43,7 +57,11 @@ export default {
       background: #fff;      
     }
     .title{
-      font-size: 14PX;
+      font-size: 16PX;
+    }
+    .iconfont{
+      width: 60px;
+      text-align: center;
     }
   }
 </style>

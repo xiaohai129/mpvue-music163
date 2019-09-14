@@ -1,5 +1,5 @@
 <template>
-  <div class="layout">
+  <div class="layout_wrap">
   </div>
 </template>
 
@@ -14,6 +14,11 @@ export default {
   },
 
   created () {
+  },
+  mounted () {
+  },
+  onShow () {
+    this.$mp.page.getTabBar().updateTabbarStatus('mine')
   }
 }
 </script>

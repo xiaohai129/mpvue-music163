@@ -1,17 +1,21 @@
 <template>
   <div class="layout">
-    <topbar>
-      {{songInfo.title}}<span class="singer_name">{{songInfo.singer}}</span>
+    <topbar 
+      :isBack='true'
+    >
+      {{songInfo.title}}<span class="singer_name" v-show="songInfo.singer.length>0">{{songInfo.singer}}</span>
     </topbar>
-    <div :class="[{'played':isPlay},'player_wrap']">
+    <div :class="[{'played':isPlay},'player_wrap',{'clean_player_mode':lyricMode=='full'}]">
       <div class="player_mask" :style="{backgroundImage:'url(' + (songInfo.imgSrc||'') + ')'}">
         <div class="mask_black"></div>
       </div>
       <div class="player_content_box" :style="playerStyle">
         <div class="controlTime" v-show="isShowControlTime">{{controlValueStr}}</div>
         <circularProgress 
-          :currentValue='currentValue' 
-          :countValue='countValue' />
+          :currentValue='currentValue'
+          :countValue='countValue'
+          :isShow='lyricMode=="small"'
+        />
         <div class="needle" >
           <cover-image src='/static/images/player/needle_dot.png' class="dot"/>
           <canvas canvas-id='needle_canvas'></canvas>
@@ -24,6 +28,7 @@
           :lyric='songInfo.lyric' 
           :currentTime='currentValue'
           ref="lyric"
+          @change="lyricShowChange"
         />
         <div class="control_wrap">
           <div class="play_control_btns">
@@ -81,7 +86,8 @@ export default {
       limitClickTime: null, // 限制疯狂点击
       ShowControlTimer: null,
       needleTimer: null,
-      timer: null
+      timer: null,
+      lyricMode: null
     }
   },
 
@@ -109,6 +115,7 @@ export default {
         this.audioManager.coverImgUrl = this.songInfo.imgSrc
         this.audioManager.title = this.songInfo.title
         this.isPlay = true
+        wx.setStorageSync('songImg', this.songInfo.imgSrc)
       })
     },
     pause () {
@@ -216,6 +223,9 @@ export default {
       }
       this.limitClickTime = time
       return false
+    },
+    lyricShowChange (status) {
+      this.lyricMode = status
     }
   },
 
@@ -270,6 +280,7 @@ export default {
 
   mounted () {
     this.showNeedleImg()
+    this.$mp.page.getTabBar().updateTabbarStatus('player')
   },
 
   onHide () {
@@ -277,7 +288,7 @@ export default {
   },
 
   onShow () {
-    if (this.audioManager.paused && !this.audioManager.paused) {
+    if (typeof (this.audioManager.paused) !== 'undefined' && !this.audioManager.paused) {
       this.isPlay = true
     }
   }
@@ -323,16 +334,29 @@ export default {
       animation-play-state:running !important;
     }
   }
+  &.clean_player_mode{
+    .player_content_box{
+      .controlTime{
+
+      }
+      .disc_box{
+        display: none;
+      }
+      .needle{
+        display: none;
+      }
+    }
+  }
   .player_mask{
-    filter: blur(20PX);
+    filter: blur(40PX);
     width: 120%;
     height: 120%;
     position: absolute;
     top: -10%;
     left: -10%;
     z-index: 1;
-    background: no-repeat center center;
-    background-size: auto 150%;
+    background: no-repeat center 0;
+    background-size: auto 200%;
     .mask_black{
       background-color: rgba($color: #000000, $alpha: 0.5);
       width: 100%;
@@ -435,6 +459,9 @@ export default {
 }
 </style>
 <style lang="scss">
+.clean_player_mode .circular_progress{
+  display: none;
+}
 .circular_progress{
   width: 290px;
   height: 290px;
