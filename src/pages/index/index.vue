@@ -17,7 +17,6 @@ export default {
   mounted () {
   },
   onShow () {
-    wx.showTabBar()
     this.$mp.page.getTabBar().updateTabbarStatus('index')
   }
 }

@@ -272,6 +272,7 @@ export default {
     this.getPlayList()
     this.audioManager.onStop(() => {
       this.isPlay = false
+      this.showNeedleImg(-1)
     })
     this.audioManager.onEnded(() => {
       this.next()
@@ -281,6 +282,7 @@ export default {
   mounted () {
     this.showNeedleImg()
     this.$mp.page.getTabBar().updateTabbarStatus('player')
+    // let songInfo = wx.
   },
 
   onHide () {
