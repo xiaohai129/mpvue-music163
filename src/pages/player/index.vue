@@ -1,5 +1,5 @@
 <template>
-  <div class="layout">
+  <div class="layout" :data-songid='songid'>
     <topbar 
       :isBack='true'
     >
@@ -92,8 +92,10 @@ export default {
   },
 
   methods: {
-    play () {
-      let songid = this.playList[this.playIndex]
+    play (songid) {
+      if (!songid) {
+        songid = this.playList[this.playIndex]
+      }
       wx.cloud.callFunction({
         name: 'getSongInfo',
         data: {
@@ -252,6 +254,13 @@ export default {
 
   computed: {
     ...mapState(['audioManager', 'topbarHeight', 'systemInfo']),
+    songid () {
+      let songid = this.$store.state.songid
+      if (songid && songid.length > 0) {
+        this.play(songid)
+      }
+      return songid
+    },
     playerStyle () {
       return `
         height:calc(100% - ${this.topbarHeight + 10}px)
@@ -282,7 +291,6 @@ export default {
   mounted () {
     this.showNeedleImg()
     this.$mp.page.getTabBar().updateTabbarStatus('player')
-    // let songInfo = wx.
   },
 
   onHide () {

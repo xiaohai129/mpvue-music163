@@ -4,7 +4,7 @@
   background:rgba(255, 255, 255, 0.9);
   position: relative;
   z-index: 1000;
-  border-top: 1rpx solid #ccc;
+  box-shadow: 0 0px 4px #ccc;
 }
 .tabbar_wrap .tabbar_layout{
   display: flex;
@@ -48,7 +48,7 @@
   display: flex;
   justify-content: center;
   align-items: center;
-  box-shadow: 0 0 4px #ccc;
+  box-shadow: 0 -2px 3px #ccc;
 }
 .tabbar_wrap .tabbar_layout .player-min .song_img{
   width: 90%;

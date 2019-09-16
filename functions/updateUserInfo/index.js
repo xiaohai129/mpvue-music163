@@ -1,0 +1,33 @@
+// 云函数入口文件
+const cloud = require('wx-server-sdk')
+
+cloud.init()
+const db = cloud.database()
+// 云函数入口函数
+exports.main = async (event, context) => {
+  let userInfo = event.userInfo
+  db.collection('users').where({ _id: userInfo.openid}).get().then(res => {
+    if(res && res.data.length>0){
+      return await db.collection('users').where({
+        _id: userInfo.openid
+      }).update({
+        data: {
+          'avatarUrl': userInfo.avatarUrl,
+          'grade': userInfo.grade,
+          'nickName': userInfo.nickName
+        }
+      })
+    } else {
+      return await db.collection('users').add({
+        data: {
+          '_id': userInfo.openid,
+          'avatarUrl': userInfo.avatarUrl,
+          'grade': userInfo.grade,
+          'gender': 1,
+          'integral': 0,
+          'nickName': userInfo.nickName
+        }
+      })
+    }
+  })
+}

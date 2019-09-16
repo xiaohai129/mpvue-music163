@@ -1,8 +1,8 @@
 {
   "pages": [
+    "pages/mine/main",
     "pages/index/main",
-    "pages/player/main",
-    "pages/mine/main"
+    "pages/player/main"
   ],
   "window": {
     "backgroundTextStyle": "light",
