@@ -2,14 +2,20 @@
 const cloud = require('wx-server-sdk')
 
 cloud.init()
+const db = cloud.database()
 
 // 云函数入口函数
 exports.main = async (event, context) => {
   let { OPENID, APPID, UNIONID } = cloud.getWXContext()
-
-  return {
-    OPENID,
-    APPID,
-    UNIONID,
-  }
+  return await db.collection('users').where({
+    _id: OPENID
+  }).get().then(res => {
+    let userInfo = res.data[0] || {}
+    return {
+      OPENID,
+      APPID,
+      UNIONID,
+      userInfo
+    }
+  })
 }

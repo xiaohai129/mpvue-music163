@@ -6,7 +6,15 @@
         <img class="avatar" :src="userInfo.avatarUrl"/>
         <div class="userinfo">
           <p v-if="isLogin" class="nickName" >{{userInfo.nickName}}</p>
-          <button v-else open-type='getUserInfo' class="getUserInfo_btn">请先登录</button>
+          <button v-else 
+            open-type='getUserInfo' 
+            class="getUserInfo_btn"
+            @getuserinfo="getUserInfo"
+          >请先登录
+            <open-data type="userAvatarUrl"></open-data>
+            <open-data type="userNickName"></open-data>
+            <open-data type="userCity"></open-data>
+          </button>
           <div class="integral_bar">
             <div class="current_value_bar"></div>
           </div>
@@ -50,9 +58,17 @@ export default {
   components: {
   },
   computed: {
-    ...mapState(['userInfo', 'isLogin']),
-    integralPercent () {
-
+    ...mapState(['userInfo', 'isLogin'])
+  },
+  methods: {
+    getUserInfo (e) {
+      let userInfo = e.target.userInfo
+      this.$store.dispatch('setUserInfo', {
+        avatarUrl: userInfo.avatarUrl,
+        openid: this.userInfo.openid,
+        nickName: userInfo.nickName,
+        gender: userInfo.gender
+      })
     }
   },
   created () {

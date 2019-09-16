@@ -6,9 +6,9 @@ const db = cloud.database()
 // 云函数入口函数
 exports.main = async (event, context) => {
   let userInfo = event.userInfo
-  db.collection('users').where({ _id: userInfo.openid}).get().then(res => {
+  return await db.collection('users').where({ _id: userInfo.openid}).get().then(res => {
     if(res && res.data.length>0){
-      return await db.collection('users').where({
+      return db.collection('users').where({
         _id: userInfo.openid
       }).update({
         data: {
@@ -17,13 +17,13 @@ exports.main = async (event, context) => {
           'nickName': userInfo.nickName
         }
       })
-    } else {
-      return await db.collection('users').add({
+    }else{
+      return db.collection('users').add({
         data: {
           '_id': userInfo.openid,
           'avatarUrl': userInfo.avatarUrl,
-          'grade': userInfo.grade,
-          'gender': 1,
+          'gender': userInfo.gender,
+          'grade': 1,
           'integral': 0,
           'nickName': userInfo.nickName
         }

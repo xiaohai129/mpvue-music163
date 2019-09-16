@@ -23,26 +23,21 @@ export default {
       name: 'getUserInfo'
     }).then(res => {
       let openid = res.result.OPENID
-      if (openid) {
+      if (JSON.stringify(res.result.userInfo) !== '{}') {
+        let userInfo = res.result.userInfo
+        context.commit(type.SET_USERINFO, userInfo)
+        context.commit(type.SET_LOGINSTATE, true)
+        return userInfo
+      } else if (openid) {
         wx.getUserInfo({
           success (res) {
-            console.log(res)
             let userInfo = {
               avatarUrl: res.userInfo.avatarUrl,
               openid: openid,
               nickName: res.userInfo.nickName,
               gender: res.userInfo.gender
             }
-            context.commit(type.SET_USERINFO, userInfo)
-            context.commit(type.SET_LOGINSTATE, true)
-            wx.cloud.callFunction({
-              name: 'updateUserInfo',
-              data: {
-                userInfo: userInfo
-              }
-            }).then(res => {
-              console.log(res)
-            })
+            context.dispatch('setUserInfo', userInfo)
           },
           fail (err) {
             console.log(err)
@@ -53,6 +48,18 @@ export default {
           }
         })
       }
+    })
+  },
+  setUserInfo (context, userInfo) {
+    context.commit(type.SET_USERINFO, userInfo)
+    context.commit(type.SET_LOGINSTATE, true)
+    wx.cloud.callFunction({
+      name: 'updateUserInfo',
+      data: {
+        userInfo: userInfo
+      }
+    }).then(res => {
+      return res
     })
   }
 }

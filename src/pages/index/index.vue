@@ -40,7 +40,7 @@ export default {
   },
   methods: {
     getSongList () {
-      wx.cloud.callFunction({
+      return wx.cloud.callFunction({
         name: 'getSongList'
       }).then(res => {
         this.songList = res.result.data
@@ -59,7 +59,16 @@ export default {
     }
   },
   mounted () {
-    this.getSongList()
+    wx.showToast({
+      title: '正在获取数据…',
+      icon: 'loading',
+      mask: true
+    })
+    this.getSongList().then(res => {
+      this.$nextTick(function () {
+        wx.hideToast()
+      })
+    })
   },
   onShow () {
     this.$mp.page.getTabBar().updateTabbarStatus('index')
