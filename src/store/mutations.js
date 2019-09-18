@@ -20,5 +20,8 @@ export default {
   },
   [type.SET_LOGINSTATE] (state, value) {
     state.isLogin = value
+  },
+  [type.SET_TABBARPLAYINFO] (state, value) {
+    state.tabbarPlayInfo = value
   }
 }

@@ -61,5 +61,8 @@ export default {
     }).then(res => {
       return res
     })
+  },
+  setTabbarPlayInfo (context, playerInfo) {
+    context.commit(type.SET_TABBARPLAYINFO, playerInfo)
   }
 }

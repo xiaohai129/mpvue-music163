@@ -3,7 +3,13 @@
     <div class="top_wrap">
       <div class="top_bg"></div>
       <div class="content">
-        <img class="avatar" :src="userInfo.avatarUrl"/>
+        <div class="avatar_wrap">
+          <img class="avatar" :src="userInfo.avatarUrl"/>
+          <div class="grade_wrap">
+            <img v-if="userInfo && userInfo.grade>0" src="/static/images/mine/icon_vip_active.png"/>
+            <img v-else src="/static/images/mine/icon_vip_close.png"/>
+          </div>
+        </div>
         <div class="userinfo">
           <p v-if="isLogin" class="nickName" >{{userInfo.nickName}}</p>
           <button v-else 
@@ -44,11 +50,13 @@
         <div class="list_item"><i class="iconfont icon-shezhi"></i>设置中心</div>
       </div>
     </div>
+    <xhtabbar />
   </div>
 </template>
 
 <script>
 import {mapState} from 'vuex'
+import xhtabbar from '@/components/tabbar'
 export default {
   data () {
     return {
@@ -56,6 +64,7 @@ export default {
   },
 
   components: {
+    xhtabbar
   },
   computed: {
     ...mapState(['userInfo', 'isLogin'])
@@ -82,9 +91,9 @@ export default {
     this.$store.dispatch('login').then(res => {
       wx.hideToast()
     })
+    console.log(this.userInfo)
   },
   onShow () {
-    this.$mp.page.getTabBar().updateTabbarStatus('mine')
   }
 }
 </script>
@@ -130,15 +139,25 @@ export default {
     display: flex;
     justify-content: left;
     padding: 10px 0 0 20px;
-    .avatar{
+    .avatar_wrap{
       width: 60px;
       height: 60px;
-      border-radius: 50%;
       position: relative;
       display: block;
+      .avatar{
+        border-radius: 50%;
+      }
+      .grade_wrap{
+        position:absolute;
+        bottom: 0;
+        right: -2px;
+        width: 20px;
+        height: 20px;
+      }
     }
     .userinfo{
-      padding-left: 10px;
+      padding-left: 15px;
+      padding-top: 6px;
       .nickName{
         font-size: 16px;
         font-weight: bold;

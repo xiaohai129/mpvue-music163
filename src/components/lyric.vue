@@ -148,11 +148,8 @@ export default {
       }
     }
     &.full_lyric_wrap{
-      position: absolute;
-      top: 0;
-      left: 0;
-      height: calc(100% - 165px);
-      margin: 0;
+      height: calc(100% - 200px);
+      margin: 40px 0 0 0;
     }
   }
 </style>

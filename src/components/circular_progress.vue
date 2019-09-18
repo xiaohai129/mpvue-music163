@@ -40,6 +40,13 @@ export default {
       let halfSize = parseInt(size / 2)
       let borderWidth = px2rpx(this.borderWidth, this.systemInfo.windowWidth, true)
       let ctx = wx.createCanvasContext('progress_bar')
+
+      ctx.setLineWidth(1)
+      ctx.setStrokeStyle('#fff')
+      ctx.beginPath()
+      ctx.arc(halfSize, halfSize, halfSize - borderWidth, 0, 2 * Math.PI, false)
+      ctx.stroke()
+
       ctx.setLineWidth(borderWidth)
       let gradient = ctx.createLinearGradient(2 * size, size, 0)
       gradient.addColorStop('0.8', '#fd4545')

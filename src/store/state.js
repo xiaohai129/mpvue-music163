@@ -9,7 +9,11 @@ export default {
     nickName: '',
     gender: 1, // 性别 0：未知、1：男、2：女
     integral: 0,
-    grade: 1,
+    grade: 0,
     openid: ''
+  },
+  tabbarPlayInfo: {
+    songImg: '/static/images/logo.png',
+    isPlay: false
   }
 }

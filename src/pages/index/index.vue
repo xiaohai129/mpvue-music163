@@ -25,10 +25,12 @@
     <div class="content_wrap" :style="{display:tabIndex==1?'block':'none'}">
       
     </div>
+    <xhtabbar />
   </div>
 </template>
 
 <script>
+import xhtabbar from '@/components/tabbar'
 export default {
   data () {
     return {
@@ -39,6 +41,7 @@ export default {
     }
   },
   components: {
+    xhtabbar
   },
   methods: {
     getSongList () {
@@ -52,7 +55,7 @@ export default {
         return false
       }
       wx.showLoading({
-        title: '正在获取数据…',
+        title: '正在获取数据',
         mask: true
       })
       return wx.cloud.callFunction({
@@ -104,9 +107,6 @@ export default {
   },
   mounted () {
     this.getSongList()
-  },
-  onShow () {
-    this.$mp.page.getTabBar().updateTabbarStatus('index')
   },
   onReachBottom () {
     // 推荐加载更多

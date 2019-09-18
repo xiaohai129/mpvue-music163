@@ -1,28 +1,31 @@
 <template>
   <div class="layout" :data-songid='songid'>
-    <topbar 
-      :isBack='true'
-    >
-      {{songInfo.title}}<span class="singer_name" v-show="songInfo.singer.length>0">{{songInfo.singer}}</span>
-    </topbar>
+    <xhtopbar :isBack='true'>
+      <div class="song_text_info">
+        <p class="title">{{songInfo.title}}</p>
+        <p class="singer" v-show="songInfo.singer.length>0">
+          {{songInfo.singer}}
+        </p>
+      </div>
+    </xhtopbar>
     <div :class="[{'played':isPlay},'player_wrap',{'clean_player_mode':lyricMode=='full'}]">
-      <div class="player_mask" :style="{backgroundImage:'url(' + (songInfo.imgSrc||'') + ')'}">
+      <div class="player_mask" :style="{backgroundImage:'url(' + (maskBgImg || '') + ')'}">
         <div class="mask_black"></div>
       </div>
       <div class="player_content_box" :style="playerStyle">
-        <div class="controlTime" v-show="isShowControlTime">{{controlValueStr}}</div>
-        <circularProgress 
-          :currentValue='currentValue'
-          :countValue='countValue'
-          :isShow='lyricMode=="small"'
-        />
-        <div class="needle" >
-          <cover-image src='/static/images/player/needle_dot.png' class="dot"/>
-          <canvas canvas-id='needle_canvas'></canvas>
-        </div>
-        <div class="disc_box" :style="{backgroundImage:'url(' + (songInfo.imgSrc||'') + ')'}">
-          <img src="/static/images/player/disc.png"/>
-          <img src="/static/images/player/disc_light.png" class="disc_light"/>
+        <div class="disc_box">
+          <img :src="songInfo.imgSrc" class="song_img"
+            @load="setMaskBgImg"
+          />
+          <div class="controlTime" v-show="isShowControlTime">{{controlValueStr}}</div>
+          <circularProgress 
+            :currentValue='currentValue'
+            :countValue='countValue'
+            :isShow='lyricMode=="small"'
+          />
+          <cover-view class="play_btn_mask" @click="switchPlayStatis">
+            <cover-image class="icon_play" src="/static/images/player/icon-play.png"/>
+          </cover-view>
         </div>
         <lyric 
           :lyric='songInfo.lyric' 
@@ -58,7 +61,7 @@
 import circularProgress from '@/components/circular_progress'
 import xhslider from '@/components/slider'
 import lyric from '@/components/lyric'
-import topbar from '@/components/topbar'
+import xhtopbar from '@/components/topbar'
 // import axios from 'axios'
 import {mapState} from 'vuex'
 import {getSongTimeStr} from '@/utils'
@@ -76,10 +79,11 @@ export default {
         title: 'X音乐',
         musicSrc: '',
         singer: '',
-        imgSrc: 'https://6d75-music163-4rnnj-1300176346.tcb.qcloud.la/images/disc_default.png?sign=835e1a26b0c711d26b8238c49823a1cf&t=1568257707',
+        imgSrc: 'https://6d75-music163-4rnnj-1300176346.tcb.qcloud.la/images/logo.png?sign=397dcb0bb7d46158211c61dc88373798&t=1568790260',
         lyric: '',
         size: 0
       },
+      maskBgImg: '',
       playTimer: null,
       playList: [],
       playIndex: 0,
@@ -93,10 +97,14 @@ export default {
 
   methods: {
     play (songid) {
+      wx.showLoading({
+        title: '正在获取数据',
+        mask: true
+      })
       if (!songid) {
         songid = this.playList[this.playIndex]
       }
-      wx.cloud.callFunction({
+      return wx.cloud.callFunction({
         name: 'getSongInfo',
         data: {
           songid: songid
@@ -117,7 +125,12 @@ export default {
         this.audioManager.coverImgUrl = this.songInfo.imgSrc
         this.audioManager.title = this.songInfo.title
         this.isPlay = true
-        wx.setStorageSync('songImg', this.songInfo.imgSrc)
+        this.$store.dispatch('setTabbarPlayInfo', {
+          songImg: this.songInfo.imgSrc,
+          isPlay: this.isPlay
+        })
+        wx.hideLoading()
+        return res
       })
     },
     pause () {
@@ -162,13 +175,17 @@ export default {
       if (this.audioManager.paused || !this.isPlay) {
         if (this.audioManager.src && this.audioManager.src.length > 0) {
           this.audioManager.play()
-          this.isPlay = true
+          return false
         } else {
           this.play()
         }
       } else {
         this.pause()
       }
+      this.$store.dispatch('setTabbarPlayInfo', {
+        songImg: this.songInfo.imgSrc,
+        isPlay: this.isPlay
+      })
     },
     getPlayList () {
       wx.cloud.callFunction({
@@ -181,33 +198,6 @@ export default {
         }
         this.playList = playList
       })
-    },
-    showNeedleImg (value) {
-      let ctx = wx.createCanvasContext('needle_canvas')
-      let needleImg = '/static/images/player/needle.png'
-      let degrees = -31
-      if (typeof (value) === 'undefined') {
-        value = -1
-      } else {
-        if (value === 1) {
-          degrees = -30
-        } else {
-          degrees = 0
-        }
-      }
-      clearInterval(this.needleTimer)
-      this.needleTimer = setInterval(() => {
-        ctx.rotate(degrees * Math.PI / 180)
-        ctx.clearRect(0, 0, 150, 150)
-        ctx.drawImage(needleImg, 2, 10, 90, 134)
-        ctx.draw()
-        degrees += value
-        if (value === 1 && degrees > 0) {
-          clearInterval(this.needleTimer)
-        } else if (value === -1 && degrees < -30) {
-          clearInterval(this.needleTimer)
-        }
-      }, 30)
     },
     limitClick () {
       let time = new Date().getTime()
@@ -228,6 +218,9 @@ export default {
     },
     lyricShowChange (status) {
       this.lyricMode = status
+    },
+    setMaskBgImg (e) {
+      this.maskBgImg = this.songInfo.imgSrc
     }
   },
 
@@ -235,19 +228,17 @@ export default {
     circularProgress,
     xhslider,
     lyric,
-    topbar
+    xhtopbar
   },
 
   watch: {
     isPlay (value, oldValue) {
       if (value) {
-        this.showNeedleImg(1)
         this.playTimer = setInterval(() => {
           this.currentValue = this.audioManager.currentTime
         }, 200)
       } else {
         clearInterval(this.playTimer)
-        this.showNeedleImg(-1)
       }
     }
   },
@@ -291,11 +282,6 @@ export default {
     })
   },
 
-  mounted () {
-    this.showNeedleImg()
-    this.$mp.page.getTabBar().updateTabbarStatus('player')
-  },
-
   onHide () {
     this.isPlay = false
   },
@@ -303,6 +289,7 @@ export default {
   onShow () {
     if (typeof (this.audioManager.paused) !== 'undefined' && !this.audioManager.paused) {
       this.isPlay = true
+      this.$refs.lyric.findLyricIndex(this.currentValue)
     }
   }
 }
@@ -317,22 +304,6 @@ export default {
     transform: rotate(360deg);
   }
 }
-@keyframes hide {
-  0%{
-    display: block;
-  }
-  100%{
-    display: none !important;
-  }
-}
-@keyframes show {
-  0%{
-    display: none;
-  }
-  100%{
-    display: block !important;
-  }
-}
 
 .player_wrap{
   width: 100%;
@@ -343,24 +314,26 @@ export default {
   left: 0;
   // 音乐播放状态
   &.played{
-    .disc_box{
+    .song_img{
       animation-play-state:running !important;
+    }
+    .play_btn_mask{
+      display: none !important;
     }
   }
   &.clean_player_mode{
     .player_content_box{
-      .controlTime{
-
-      }
+      .controlTime{}
       .disc_box{
         display: none;
       }
-      .needle{
-        display: none;
+      .play_btn_mask{
+        display: none !important;
       }
     }
   }
   .player_mask{
+    transition:background 1s ease-in;
     filter: blur(40PX);
     width: 160%;
     height: 160%;
@@ -369,7 +342,7 @@ export default {
     left: -30%;
     z-index: 1;
     background: no-repeat center 0;
-    background-size: auto 200%;
+    background-size: auto 150%;
     .mask_black{
       background-color: rgba($color: #000000, $alpha: 0.5);
       width: 100%;
@@ -382,40 +355,55 @@ export default {
     left: 0;
     bottom: 0;
     z-index: 10;
-    .controlTime{
-      transform: display .5s ease-in;
-      position: absolute;
-      top: 122px;
-      width: 196px;
-      height: 196px;
-      line-height: 200px;
-      text-align: center;
-      background: rgba($color: #000, $alpha: 0.8);
-      font-size: 20px;
-      color: #fff;
-      z-index: 4;
-      border-radius: 50%;
-      left: 50%;
-      margin-left: -98px;
-    }
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
     .disc_box{
-      width: 300px;
-      height: 300px;
-      margin: 70px auto 0 auto;
-      background: no-repeat center center;
-      background-size: 194px 194px;
-      animation: played 15s linear infinite;
-      animation-play-state:paused;
-      .disc_light{
+      width: 250px;
+      height: 250px;
+      margin: 30px auto 0 auto;
+      border-radius: 50%;
+      box-shadow: 0 4px 8px #222;
+      border:2px solid rgba(255,255,255,0.8);
+      position: relative;
+      .song_img{
+        animation: played 15s linear infinite;
+        animation-play-state:paused;
+        border-radius: 50%;
+      }
+      .controlTime{
+        transform: display .5s ease-in;
         position: absolute;
         top: 0;
         left: 0;
-        z-index: 8;
+        width: 100%;
+        height: 100%;
+        line-height: 250px;
+        text-align: center;
+        background: rgba($color: #000, $alpha: 0.7);
+        font-size: 20px;
+        color: #fff;
+        z-index: 4;
+        border-radius: 50%;
+      }
+      .play_btn_mask{
+        background: rgba($color: #000, $alpha: 0.7);
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        border-radius: 50%;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        .icon_play{
+          width: 60px;
+          height: 60px;
+        }
       }
     }
     .control_wrap{
-      position: absolute;
-      bottom: 0;
       padding-bottom: 15px;
       width: 100%;
     }
@@ -447,27 +435,6 @@ export default {
         text-align: center;
       }
     }
-    .needle{
-      width: 150px;
-      height: 150px;
-      position: absolute;
-      left: 50%;
-      top: 0;
-      z-index: 20;
-      margin-left: -14px;
-      .dot{
-        width: 30PX;
-        height: 30PX;
-        position: absolute;
-        top: -15PX;
-        left: 0PX;
-        z-index: 10;
-      }
-      canvas{
-        width:100%;
-        height: 100%;
-      }
-    }
   }
 }
 </style>
@@ -476,19 +443,26 @@ export default {
   display: none;
 }
 .circular_progress{
-  width: 290px;
-  height: 290px;
+  width: 280px;
+  height: 280px;
   z-index: 0;
   position: absolute !important;
-  top: 75px;
-  left: 44px;
+  top: -15px;
+  left: -15px;
 }
 .xh_slider{
   width: 250px !important;
 }
-.singer_name{
-  font-size: 12px;
-  color: rgba($color: #fff, $alpha: 0.8);
-  margin-left: 6px;
+.topbar_wrap{
+  line-height: 20px;
+}
+.song_text_info{
+  .title{}
+  .singer{
+    font-size: 10px;
+    color: rgba($color: #fff, $alpha: 0.8);
+    margin-left: 6px;
+    margin-top: -20px;
+  }
 }
 </style>

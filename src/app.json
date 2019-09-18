@@ -1,8 +1,8 @@
 {
   "pages": [
-    "pages/index/main",
     "pages/mine/main",
-    "pages/player/main"
+    "pages/player/main",
+    "pages/index/main"
   ],
   "window": {
     "backgroundTextStyle": "light",
@@ -12,7 +12,7 @@
   },
   "requiredBackgroundModes": ["audio"],
   "tabBar": {
-    "custom": true,
+    "custom": false,
     "color": "#9e9e9e",
     "selectedColor": "#000000",
     "list": [{
