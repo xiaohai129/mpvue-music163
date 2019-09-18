@@ -89,9 +89,15 @@ export default {
 }
 </script>
 
+<style>
+  page{
+    background-color: #eee
+  }
+</style>
 <style lang='scss' scoped>
 .layout{
   overflow: hidden;
+  padding-bottom: 50PX;
 }
 .top_wrap{
   position: relative;

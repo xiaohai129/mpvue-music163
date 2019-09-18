@@ -8,7 +8,7 @@ const db = cloud.database()
 // 云函数入口函数
 exports.main = async (event, context) => {
   let page = event.page || 0
-  return await db.collection('songs').skip(20 * page).limit(20).field({
+  return await db.collection('songs').skip(15 * page).limit(15).field({
     type: false,
     musicSrc: false,
     lyric: false

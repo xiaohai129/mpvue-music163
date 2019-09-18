@@ -87,7 +87,7 @@ export default {
       ShowControlTimer: null,
       needleTimer: null,
       timer: null,
-      lyricMode: null
+      lyricMode: 'small'
     }
   },
 
@@ -207,7 +207,7 @@ export default {
         } else if (value === -1 && degrees < -30) {
           clearInterval(this.needleTimer)
         }
-      }, 25)
+      }, 30)
     },
     limitClick () {
       let time = new Date().getTime()
@@ -286,6 +286,9 @@ export default {
     this.audioManager.onEnded(() => {
       this.next()
     })
+    this.audioManager.onError((err) => {
+      console.log(err)
+    })
   },
 
   mounted () {
@@ -359,11 +362,11 @@ export default {
   }
   .player_mask{
     filter: blur(40PX);
-    width: 120%;
-    height: 120%;
+    width: 160%;
+    height: 160%;
     position: absolute;
-    top: -10%;
-    left: -10%;
+    top: -30%;
+    left: -30%;
     z-index: 1;
     background: no-repeat center 0;
     background-size: auto 200%;

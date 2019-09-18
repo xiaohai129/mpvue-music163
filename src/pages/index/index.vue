@@ -33,18 +33,62 @@ export default {
   data () {
     return {
       songList: [],
-      tabIndex: 0
+      tabIndex: 0,
+      page: 0,
+      isMore1: true
     }
   },
   components: {
   },
   methods: {
     getSongList () {
-      return wx.cloud.callFunction({
-        name: 'getSongList'
-      }).then(res => {
-        this.songList = res.result.data
+      if (!this.isMore1) {
+        this.showToast({
+          title: '无更多内容',
+          icon: 'none',
+          mask: true,
+          time: 1000
+        })
+        return false
+      }
+      wx.showLoading({
+        title: '正在获取数据…',
+        mask: true
       })
+      return wx.cloud.callFunction({
+        name: 'getSongList',
+        data: {
+          page: this.page
+        }
+      }).then(res => {
+        let data = res.result.data
+        if (data.length <= 0) {
+          this.showToast({
+            title: '无更多内容',
+            icon: 'none',
+            mask: true,
+            time: 1000
+          })
+          this.isMore1 = false
+          return false
+        }
+        this.songList = this.songList.concat(data)
+        this.page++
+        this.$nextTick(function () {
+          wx.hideLoading()
+        })
+      })
+    },
+    showToast (options) {
+      wx.showToast({
+        title: options.title,
+        icon: options.icon,
+        mask: options.mask
+      })
+      let timer = setTimeout(() => {
+        clearTimeout(timer)
+        wx.hideToast()
+      }, options.time)
     },
     switchTab (e, index) {
       this.tabIndex = index
@@ -59,26 +103,23 @@ export default {
     }
   },
   mounted () {
-    wx.showToast({
-      title: '正在获取数据…',
-      icon: 'loading',
-      mask: true
-    })
-    this.getSongList().then(res => {
-      this.$nextTick(function () {
-        wx.hideToast()
-      })
-    })
+    this.getSongList()
   },
   onShow () {
     this.$mp.page.getTabBar().updateTabbarStatus('index')
+  },
+  onReachBottom () {
+    // 推荐加载更多
+    if (this.tabIndex === 0) {
+      this.getSongList()
+    }
   }
 }
 </script>
-
 <style lang='scss' scoped>
+
 .layout{
-  background-color: #fff;
+  padding-bottom: 50PX;
 }
 .tabbar_roll{
   width: 100%;
