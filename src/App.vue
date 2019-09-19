@@ -11,6 +11,11 @@ export default {
 </script>
 <style lang='scss'>
   @import '../static/iconfont/iconfont.css';
-  page,.layout{min-height: 100%;}
+  page{height: 100%;}
+  .layout{
+    padding-bottom: 54PX;
+    height: 100%;
+    box-sizing: border-box;
+  }
   img{width: 100%;height: 100%;}
 </style>

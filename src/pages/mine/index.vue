@@ -82,7 +82,7 @@ export default {
   },
   created () {
     wx.showToast({
-      title: '正在获取数据…',
+      title: '正在获取数据',
       icon: 'loading',
       mask: true
     })
@@ -91,9 +91,6 @@ export default {
     this.$store.dispatch('login').then(res => {
       wx.hideToast()
     })
-    console.log(this.userInfo)
-  },
-  onShow () {
   }
 }
 </script>

@@ -15,5 +15,6 @@ export default {
   tabbarPlayInfo: {
     songImg: '/static/images/logo.png',
     isPlay: false
-  }
+  },
+  playList: []
 }

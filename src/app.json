@@ -1,14 +1,15 @@
 {
   "pages": [
+    "pages/search/main",
+    "pages/index/main",
     "pages/mine/main",
-    "pages/player/main",
-    "pages/index/main"
+    "pages/player/main"
   ],
   "window": {
     "backgroundTextStyle": "light",
-    "navigationBarBackgroundColor": "#fff",
+    "navigationBarBackgroundColor": "#fd4545",
     "navigationBarTitleText": "X音乐",
-    "navigationBarTextStyle": "black"
+    "navigationBarTextStyle": "white"
   },
   "requiredBackgroundModes": ["audio"],
   "tabBar": {

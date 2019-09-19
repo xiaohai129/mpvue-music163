@@ -23,5 +23,8 @@ export default {
   },
   [type.SET_TABBARPLAYINFO] (state, value) {
     state.tabbarPlayInfo = value
+  },
+  [type.SET_PLAYLIST] (state, value) {
+    state.playList = value
   }
 }

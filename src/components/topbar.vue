@@ -7,7 +7,8 @@
       v-show="isBack"
       @click="gotoHomePage"
     ></div>
-    <div class="title"><slot>{{title}}</slot></div>
+    <div class="title" v-if="title"></div>
+    <slot></slot>
     <div class="iconfont" v-show="isBack"></div>
   </div>
 </template>
@@ -15,13 +16,18 @@
 <script>
 import {mapState} from 'vuex'
 export default {
-  props: ['title', 'TextStyle', 'isBack'],
+  props: ['title', 'TextStyle', 'isBack', 'bgColor', 'autoHeight'],
   computed: {
     ...mapState(['topbarHeight', 'systemInfo']),
     topbarStyle () {
-      return `
-        padding-top: ${this.systemInfo.statusBarHeight}PX
+      let style = `
+        padding-top: ${this.systemInfo.statusBarHeight}PX;
+        background: ${this.bgColor || 'none'};
       `
+      if (this.autoHeight) {
+        style += 'height:auto;'
+      }
+      return style
     }
   },
   methods: {
@@ -49,6 +55,8 @@ export default {
     text-align: center;
     display: flex;
     justify-content: space-between;
+    flex-wrap: wrap;
+    padding-right: 50PX;
     &.black{
       color: #000 !important;
       background: #000000;

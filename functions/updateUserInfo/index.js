@@ -7,6 +7,7 @@ const db = cloud.database()
 exports.main = async (event, context) => {
   let userInfo = event.userInfo
   return await db.collection('users').where({ _id: userInfo.openid}).get().then(res => {
+    let data = {}
     if(res && res.data.length>0){
       return db.collection('users').where({
         _id: userInfo.openid
@@ -29,5 +30,9 @@ exports.main = async (event, context) => {
         }
       })
     }
+  }).then(res => {
+    return db.collection('users').where({
+      _id: res._id
+    }).get()
   })
 }

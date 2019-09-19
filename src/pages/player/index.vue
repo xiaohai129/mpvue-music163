@@ -85,8 +85,8 @@ export default {
       },
       maskBgImg: '',
       playTimer: null,
-      playList: [],
       playIndex: 0,
+      playMode: 0, // 0:随机，1：顺序，2：重复
       limitClickTime: null, // 限制疯狂点击
       ShowControlTimer: null,
       needleTimer: null,
@@ -102,7 +102,7 @@ export default {
         mask: true
       })
       if (!songid) {
-        songid = this.playList[this.playIndex]
+        songid = this.playList[this.playIndex]._id
       }
       return wx.cloud.callFunction({
         name: 'getSongInfo',
@@ -141,7 +141,7 @@ export default {
       if (this.limitClick()) {
         return false
       }
-      if (this.playIndex < this.playList.length) {
+      if (this.playIndex < this.playList.length - 1) {
         this.playIndex++
       } else {
         this.playIndex = 0
@@ -187,18 +187,6 @@ export default {
         isPlay: this.isPlay
       })
     },
-    getPlayList () {
-      wx.cloud.callFunction({
-        name: 'getSongidList'
-      }).then(res => {
-        let data = res.result.data
-        let playList = []
-        for (let i in data) {
-          playList.push(data[i]._id)
-        }
-        this.playList = playList
-      })
-    },
     limitClick () {
       let time = new Date().getTime()
       if ((time - this.limitClickTime) <= 2000) {
@@ -221,6 +209,23 @@ export default {
     },
     setMaskBgImg (e) {
       this.maskBgImg = this.songInfo.imgSrc
+    },
+    getSongList () {
+      wx.showLoading({
+        title: '正在获取数据',
+        mask: true
+      })
+      return wx.cloud.callFunction({
+        name: 'getSongList',
+        data: {
+          page: 0,
+          type: 0
+        }
+      }).then(res => {
+        let data = res.result.data
+        this.$store.dispatch('setPlayList', data)
+        wx.hideLoading()
+      })
     }
   },
 
@@ -244,10 +249,16 @@ export default {
   },
 
   computed: {
-    ...mapState(['audioManager', 'topbarHeight', 'systemInfo']),
+    ...mapState(['audioManager', 'topbarHeight', 'systemInfo', 'playList']),
     songid () {
       let songid = this.$store.state.songid
       if (songid && songid.length > 0) {
+        for (let i in this.playList) {
+          if (this.playList[i]._id === songid) {
+            this.playIndex = i
+            break
+          }
+        }
         this.play(songid)
       }
       return songid
@@ -269,10 +280,8 @@ export default {
   },
 
   created () {
-    this.getPlayList()
     this.audioManager.onStop(() => {
-      this.isPlay = false
-      this.showNeedleImg(-1)
+      this.pause()
     })
     this.audioManager.onEnded(() => {
       this.next()
@@ -280,6 +289,9 @@ export default {
     this.audioManager.onError((err) => {
       console.log(err)
     })
+    if (this.playList.length <= 0) {
+      this.getSongList()
+    }
   },
 
   onHide () {
@@ -289,6 +301,7 @@ export default {
   onShow () {
     if (typeof (this.audioManager.paused) !== 'undefined' && !this.audioManager.paused) {
       this.isPlay = true
+      this.currentValue = this.audioManager.currentTime
       this.$refs.lyric.findLyricIndex(this.currentValue)
     }
   }
@@ -457,11 +470,16 @@ export default {
   line-height: 20px;
 }
 .song_text_info{
-  .title{}
+  max-width: 200px;
+  p{
+    width: 100%;
+    overflow: hidden;
+    text-overflow:ellipsis;
+    white-space: nowrap;
+  }
   .singer{
-    font-size: 10px;
+    font-size: 12px;
     color: rgba($color: #fff, $alpha: 0.8);
-    margin-left: 6px;
     margin-top: -20px;
   }
 }

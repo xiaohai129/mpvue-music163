@@ -8,9 +8,17 @@ const db = cloud.database()
 // 云函数入口函数
 exports.main = async (event, context) => {
   let page = event.page || 0
-  return await db.collection('songs').skip(15 * page).limit(15).field({
-    type: false,
-    musicSrc: false,
-    lyric: false
-  }).get()
+  let type = event.type+1 || 1
+  return await db.collection('classify').where({
+    _id: type
+  }).get().then(res => {
+    let data = res.data
+    return db.collection('songs').where({
+      _id: db.command.in(data[0].list)
+    }).skip(15 * page).limit(15).field({
+      type: false,
+      musicSrc: false,
+      lyric: false
+    }).get()
+  })
 }

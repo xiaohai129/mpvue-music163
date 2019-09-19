@@ -51,18 +51,21 @@ export default {
     })
   },
   setUserInfo (context, userInfo) {
-    context.commit(type.SET_USERINFO, userInfo)
-    context.commit(type.SET_LOGINSTATE, true)
     wx.cloud.callFunction({
       name: 'updateUserInfo',
       data: {
         userInfo: userInfo
       }
     }).then(res => {
-      return res
+      context.commit(type.SET_USERINFO, res.result.data[0])
+      context.commit(type.SET_LOGINSTATE, true)
+      return res.result.data[0]
     })
   },
   setTabbarPlayInfo (context, playerInfo) {
     context.commit(type.SET_TABBARPLAYINFO, playerInfo)
+  },
+  setPlayList (context, playList) {
+    context.commit(type.SET_PLAYLIST, playList)
   }
 }
