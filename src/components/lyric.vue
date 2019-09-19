@@ -47,7 +47,7 @@ export default {
       let item, times, num, lyric, i, j
       for (i in lyricArr) {
         item = lyricArr[i]
-        times = item.match(/(?<=\[)(.*?)(?=\])/g)
+        times = item.match(/(\d*:\d*)/g)
         lyric = item.substr(item.lastIndexOf(']') + 1)
         for (j in times) {
           num = this.getTimeValue(times[j])
@@ -116,7 +116,7 @@ export default {
         return false
       }
       let sTime = this.lyricArr[this.lyricIndex].time
-      if (value + 1 > sTime) {
+      if (value + 0.4 > sTime) {
         this.lyricIndex++
       }
     },
