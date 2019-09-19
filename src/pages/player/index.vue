@@ -160,8 +160,10 @@ export default {
       this.play()
     },
     seek (time) {
-      this.audioManager.seek(time)
-      this.$refs.lyric.findLyricIndex(time)
+      if (time > 0) {
+        this.audioManager.seek(time)
+        this.$refs.lyric.findLyricIndex(time)
+      }
     },
     sliderChange (time) {
       clearTimeout(this.ShowControlTimer)

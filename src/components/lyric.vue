@@ -42,20 +42,37 @@ export default {
       return (parseInt(aTime[0]) * 60) + parseFloat(aTime[1])
     },
     getLyricInfo () {
-      this.lyricIndex = 0
-      this.lyricArr = []
-      let sArr = this.lyric.split('↵')
-      let aLyric = []
-      for (let i in sArr) {
-        let oTemp = {}
-        let tIndex = sArr[i].indexOf(']')
-        oTemp.time = sArr[i].substr(1, tIndex - 1)
-        oTemp.text = sArr[i].substr(tIndex + 1)
-        if (oTemp.time.length > 0) {
-          aLyric.push(oTemp)
+      let lyricArr = this.lyric.split('↵')
+      let lyricList = []
+      let item, times, num, lyric, i, j
+      for (i in lyricArr) {
+        item = lyricArr[i]
+        times = item.match(/(?<=\[)(.*?)(?=\])/g)
+        lyric = item.substr(item.lastIndexOf(']') + 1)
+        for (j in times) {
+          num = this.getTimeValue(times[j])
+          if (isNaN(num)) {
+            break
+          }
+          lyricList.push({
+            time: this.getTimeValue(times[j]),
+            text: lyric
+          })
         }
       }
-      this.lyricArr = aLyric
+      this.lyricIndex = 0
+      this.lyricArr = lyricList.sort(this.lyricTimeCompare)
+    },
+    lyricTimeCompare (obj1, obj2) {
+      let time1 = obj1.time
+      let time2 = obj2.time
+      if (time1 < time2) {
+        return -1
+      } else if (time1 > time2) {
+        return 1
+      } else {
+        return 0
+      }
     },
     findLyricIndex (time) {
       if (this.lyricIndex >= this.lyricArr.length) {
@@ -63,13 +80,13 @@ export default {
       }
       let currentTime = this.lyricArr[this.lyricIndex].time
       let direction = 1
-      if (this.getTimeValue(currentTime) > time) {
+      if (currentTime > time) {
         direction = -1
       }
       let currentIndex = this.lyricIndex
       let isFind = false
       while (!isFind && (currentIndex >= 0 && currentIndex < this.lyricArr.length)) {
-        currentTime = this.getTimeValue(this.lyricArr[currentIndex].time)
+        currentTime = this.lyricArr[currentIndex].time
         if (direction === 1 && currentTime > time) {
           isFind = true
           this.lyricIndex = currentIndex
@@ -99,8 +116,7 @@ export default {
         return false
       }
       let sTime = this.lyricArr[this.lyricIndex].time
-      let tempTime = this.getTimeValue(sTime)
-      if (value > tempTime) {
+      if (value + 1 > sTime) {
         this.lyricIndex++
       }
     },

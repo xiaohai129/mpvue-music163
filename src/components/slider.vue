@@ -65,7 +65,9 @@ export default {
     },
     onTouchend () {
       this.isControl = false
-      this.$emit('changeEnd', this.controlValue)
+      if (Math.abs(this.controlValue - this.currentValue) > 5) {
+        this.$emit('changeEnd', this.controlValue)
+      }
     }
   },
 
