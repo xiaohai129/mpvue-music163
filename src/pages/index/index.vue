@@ -272,6 +272,7 @@ export default {
         height: 45px;
         margin-right: 10px;
         flex-shrink: 0;
+        background-color: #ddd;
       }
       h2{
         font-size: 16px;
@@ -279,6 +280,9 @@ export default {
       p{
         font-size: 12px;
         color: #999;
+      }
+      &:first-of-type{
+        padding-top: 14px;
       }
       &:last-of-type{
         border: none;

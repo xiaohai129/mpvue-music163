@@ -2,6 +2,7 @@
   "pages": [
     "pages/index/main",
     "pages/search/main",
+    "pages/search_details/main",
     "pages/mine/main",
     "pages/player/main"
   ],
@@ -9,7 +10,8 @@
     "backgroundTextStyle": "light",
     "navigationBarBackgroundColor": "#fd4545",
     "navigationBarTitleText": "X音乐",
-    "navigationBarTextStyle": "white"
+    "navigationBarTextStyle": "white",
+    "backgroundColor":"#fd4545"
   },
   "requiredBackgroundModes": ["audio"],
   "tabBar": {

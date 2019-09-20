@@ -127,7 +127,7 @@ export default {
         this.isPlay = true
         this.$store.dispatch('setTabbarPlayInfo', {
           songImg: this.songInfo.imgSrc,
-          isPlay: this.isPlay
+          isPlay: true
         })
         wx.hideLoading()
         return res
@@ -174,19 +174,23 @@ export default {
       }, 2000)
     },
     switchPlayStatis () {
-      if (this.audioManager.paused || !this.isPlay) {
+      let isPlay = this.isPlay
+      if (this.audioManager.paused || !isPlay) {
         if (this.audioManager.src && this.audioManager.src.length > 0) {
           this.audioManager.play()
-          return false
+          isPlay = true
         } else {
           this.play()
+          return true
         }
       } else {
         this.pause()
+        isPlay = false
       }
+      this.isPlay = isPlay
       this.$store.dispatch('setTabbarPlayInfo', {
         songImg: this.songInfo.imgSrc,
-        isPlay: this.isPlay
+        isPlay: isPlay
       })
     },
     limitClick () {

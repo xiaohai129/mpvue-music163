@@ -9,24 +9,50 @@
         placeholder="搜索歌名、歌手" 
         placeholder-class="placeholder"
         v-model="keywords"
+        :focus='true'
       >
     </div>
 
-    <div class="serching_list" v-show="keywords.length>0">
-      <div class="title">
-        搜索"{{keywords}}"
-      </div>
-      <div class="search_item">
+    <div class="serching_list" v-show="isSearch">
+      <div class="search_item" v-for="(item, index) in searchData.songs" 
+        :key="index"
+        @click="gotoSearchDetails($event,'song', index)"
+      >
         <div class="left">
           <span class="prefix_text">搜索</span>
-          12121
+          {{item.title}}
         </div>
         <div class="right iconfont icon-sousuo"></div>
       </div>
+      <div class="search_item" v-for="(item, index) in searchData.singers" 
+        :key="index"
+        @click="gotoSearchDetails($event,'singer',index)"
+      >
+        <div class="left">
+          <span class="prefix_text">搜索</span>
+          {{item.singer}}
+        </div>
+        <div class="right iconfont icon-sousuo"></div>
+      </div>
+      <div class="tips_text" v-show="isShowNoData">
+        {{searchTipText}}
+      </div>
     </div>
 
-    <div v-show="keywords.length <= 0" class="searched_list">
-      <div class="title"><span>搜索历史</span><span class="cleanup_btn">清除历史</span></div>
+    <div v-show="!isSearch" class="searched_list">
+      <div class="title"><span>搜索历史</span><span class="cleanup_btn" v-if="searchHistorys.length>0">清除历史</span></div>
+      <div class="tips_text" v-if="searchHistorys.length<=0">
+        暂无任何搜索记录
+      </div>
+      <div class="search_item" v-for="(item, index) in searchHistorys" 
+        :key="index"
+        @click="fastSearch($event,item)"
+      >
+        <div class="left">
+          {{item}}
+        </div>
+        <div class="right iconfont icon-cha" @click="deleteHistoryItem($event, index)"></div>
+      </div>
     </div>
   </div>
 </template>
@@ -36,18 +62,68 @@ export default {
   data () {
     return {
       keywords: '',
-      searchTimer: null
+      searchTimer: null,
+      searchData: {
+        songs: [],
+        singers: []
+      },
+      searchHistorys: [],
+      searchTipText: '无匹配数据'
     }
   },
 
   components: {
   },
-
   methods: {
+    gotoSearchDetails (e, type, dataIndex) {
+      let keywords, datas
+      if (type === 'song') {
+        let data = this.searchData.songs[dataIndex]
+        keywords = data.title
+        datas = data._id
+      } else if (type === 'singer') {
+        let data = this.searchData.singers[dataIndex]
+        keywords = data.singer
+        datas = data.list.join(',')
+      }
+      this.searchHistorys.map((item, index) => {
+        if (item === keywords) {
+          this.searchHistorys.splice(index, 1)
+          return true
+        }
+      })
+      this.searchHistorys = [keywords].concat(this.searchHistorys)
+      wx.setStorageSync('searchHistorys', this.searchHistorys.join(','))
+      if (keywords && datas) {
+        wx.navigateTo({
+          url: '/pages/search_details/main?keywords=' + keywords + '&type=' + type + '&data=' + datas
+        })
+      }
+    },
+    fastSearch (e, value) {
+      this.keywords = value
+    },
+    deleteHistoryItem (e, dataIndex) {
+      this.searchHistorys.splice(dataIndex, 1)
+      if (this.searchHistorys.length <= 0) {
+        wx.removeStorageSync('searchHistorys')
+      } else {
+        wx.setStorageSync('searchHistorys', this.searchHistorys.join(','))
+      }
+      return false
+    }
   },
   watch: {
     keywords (value, oldValue) {
+      this.searchTipText = '正在加载…'
       clearTimeout(this.searchTimer)
+      if (value.length <= 0) {
+        this.searchData = {
+          songs: [],
+          singers: []
+        }
+        return false
+      }
       this.searchTimer = setTimeout(() => {
         wx.cloud.callFunction({
           name: 'searchInfo',
@@ -55,13 +131,36 @@ export default {
             keywords: value
           }
         }).then(res => {
-          console.log(res)
+          this.searchData = res.result
+          if (this.searchData.songs.length <= 0 && this.searchData.singers.length <= 0) {
+            this.searchTipText = '无匹配数据'
+          } else if (this.searchData.songs.length <= 0 || this.searchData.singers.length <= 0) {
+            if (this.searchData.songs.length === 1) {
+              this.gotoSearchDetails(null, 'song', 0)
+            } else if (this.searchData.singers.length === 1) {
+              this.gotoSearchDetails(null, 'singer', 0)
+            }
+            return false
+          }
         })
       }, 500)
     }
   },
-
+  computed: {
+    isShowNoData () {
+      return this.searchData.songs.length <= 0 && this.searchData.singers.length <= 0
+    },
+    isSearch () {
+      return this.keywords.length > 0
+    }
+  },
   created () {
+    let historyData = wx.getStorageSync('searchHistorys')
+    if (historyData.length <= 0) {
+      this.searchHistorys = []
+    } else {
+      this.searchHistorys = historyData.split(',')
+    }
   }
 }
 </script>
@@ -82,15 +181,15 @@ export default {
     left: 3%;
     width: 30px;
     text-align: center;
-    line-height: 32PX;
+    line-height: 38PX;
   }
   .input_box{
     width: 96%;
-    height: 30PX;
-    line-height: 30PX;
+    height: 36PX;
+    line-height: 36PX;
     background-color: rgba($color: #fff, $alpha: 0.2);
     border-radius: 15PX;
-    font-size: 12px;
+    font-size: 14px;
     text-align: left;
     margin: 0 auto;
     padding-left: 30px;
@@ -120,6 +219,11 @@ export default {
       text-align: center;
     }
   }
+  .search_item .right{
+    color: rgba($color: #000000, $alpha: 0.3);
+    width: 50px;
+    text-align: center;
+  }
 }
 .serching_list{
   padding-left: 10px;
@@ -147,6 +251,12 @@ export default {
     width: 30px;
     color: rgba($color: #000000, $alpha: 0.6)
   }
+}
+.tips_text{
+  font-size: 14px;
+  color: #666;
+  line-height: 240px;
+  text-align: center;
 }
 </style>
 <style>
