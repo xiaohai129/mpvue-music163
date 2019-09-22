@@ -21,9 +21,12 @@
             <open-data type="userNickName"></open-data>
             <open-data type="userCity"></open-data>
           </button>
-          <div class="integral_bar">
-            <div class="current_value_bar"></div>
+          <div :class="{fading_bar:!isLogin,integral_bar:true}">
+            <div class="current_value_bar" :style="{width:integralPercent+'%'}"></div>
           </div>
+          <span class="integral_text" v-show="isLogin">
+            {{userInfo.integral}} / {{gradeValue}}
+          </span>
         </div>
       </div>
     </div>
@@ -46,7 +49,14 @@
       </div>
 
       <div class="content">
-        <div class="list_item"><i class="iconfont icon-ziliao"></i>我的资料</div>
+          <button
+            open-type='getUserInfo' 
+            class="hidden_getUserInfo_btn"
+            @getuserinfo="getUserInfo"
+            v-if="!isLogin"
+          >
+          </button>
+        <div class="list_item" @click="gotoPage($evnet,{url:'/pages/personal/main'})"><i class="iconfont icon-ziliao"></i>我的资料</div>
         <div class="list_item"><i class="iconfont icon-shezhi"></i>设置中心</div>
       </div>
     </div>
@@ -57,26 +67,52 @@
 <script>
 import {mapState} from 'vuex'
 import xhtabbar from '@/components/tabbar'
+import {GRADE} from '@/config'
 export default {
   data () {
     return {
     }
   },
-
   components: {
     xhtabbar
   },
   computed: {
-    ...mapState(['userInfo', 'isLogin'])
+    ...mapState(['userInfo', 'isLogin']),
+    gradeValue () {
+      return GRADE[this.userInfo.grade - 1] || 0
+    },
+    integralPercent () {
+      if (this.gradeValue) {
+        let integral = this.userInfo.integral
+        return (this.grade / integral).toFixed(2)
+      } else {
+        return 0
+      }
+    }
   },
   methods: {
     getUserInfo (e) {
       let userInfo = e.target.userInfo
-      this.$store.dispatch('setUserInfo', {
-        avatarUrl: userInfo.avatarUrl,
-        openid: this.userInfo.openid,
-        nickName: userInfo.nickName,
-        gender: userInfo.gender
+      if (userInfo) {
+        this.$store.dispatch('setUserInfo', {
+          avatarUrl: userInfo.avatarUrl,
+          openid: this.userInfo.openid,
+          nickName: userInfo.nickName,
+          gender: userInfo.gender
+        })
+      }
+    },
+    gotoPage (e, options) {
+      let params = ''
+      if (options.data) {
+        let data = []
+        for (let key in options.data) {
+          data.push(`${key}=${options.data[key]}`)
+        }
+        params += '?' + data.join('&')
+      }
+      wx.navigateTo({
+        url: options.url + params
       })
     }
   },
@@ -110,6 +146,7 @@ export default {
   color: #fff;
   font-size: 14px;
   padding-bottom: 40px;
+  overflow: hidden;
   .top_bg{
     background-color: $main-color;
     width: 160%;
@@ -136,6 +173,7 @@ export default {
     display: flex;
     justify-content: left;
     padding: 10px 0 0 20px;
+    overflow: hidden;
     .avatar_wrap{
       width: 60px;
       height: 60px;
@@ -155,23 +193,23 @@ export default {
     .userinfo{
       padding-left: 15px;
       padding-top: 6px;
+      box-sizing: border-box;
+      position: relative;
       .nickName{
         font-size: 16px;
         font-weight: bold;
-        margin-top: 5px;
       }
       .integral_bar{
-        width: 150px;
+        width: 200px;
         height: 8px;
         border-radius: 4px;
         overflow: hidden;
         background-color: $second-color;
-        box-shadow: 0 0 4px inset rgba($color: #fff, $alpha: 0.5);
-        border: 2px solid $second-color;
+        box-shadow: 0 0 2px inset rgba($color: #fff, $alpha: 0.5);
         margin-top: 15px;
         position: relative;
         .current_value_bar{
-          width: 10%;
+          width: 0%;
           height: 100%;
           background-color: red;
           border-radius: 4px;
@@ -179,6 +217,17 @@ export default {
           left: 0;
           top: 0
         }
+        &.fading_bar{
+          box-shadow: none;
+          background-color:#8a8a8a;
+        }
+      }
+      .integral_text{
+        position: absolute;
+        left: 220px;
+        bottom: 4px;
+        font-size: 12px;
+        white-space: nowrap;
       }
       .getUserInfo_btn{
         width: 100px;
@@ -204,6 +253,17 @@ export default {
     padding: 10px 0;
     border-radius: 5px;
     margin-top: 10px;
+    position: relative;
+    .hidden_getUserInfo_btn{
+      width: 100%;
+      height: 100%;
+      position: absolute;
+      top: 0;
+      left: 0;
+      background: none;
+      border: none;
+      z-index: 1000;
+    }
     .action_btns{
       display: flex;
       justify-content: space-around;

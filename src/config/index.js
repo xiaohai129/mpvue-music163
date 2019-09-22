@@ -10,6 +10,7 @@ module.exports = {
   ],
   CLASSIFYS: [
     '热歌',
-    '金典'
+    '金典',
+    '粤语'
   ]
 }

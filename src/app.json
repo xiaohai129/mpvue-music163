@@ -1,9 +1,10 @@
 {
   "pages": [
     "pages/index/main",
+    "pages/personal/main",
+    "pages/mine/main",
     "pages/search/main",
     "pages/search_details/main",
-    "pages/mine/main",
     "pages/player/main"
   ],
   "window": {

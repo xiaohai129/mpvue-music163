@@ -45,3 +45,14 @@ export function rpx2px (value, winWidth, isInt) {
   }
   return newVale
 }
+export function showToast (options) {
+  wx.showToast({
+    title: options.title,
+    icon: options.icon || 'none',
+    mask: options.mask || false
+  })
+  let timer = setTimeout(() => {
+    clearTimeout(timer)
+    wx.hideToast()
+  }, options.time || 1000)
+}

@@ -46,6 +46,7 @@
 import xhtopbar from '@/components/topbar'
 import xhtabbar from '@/components/tabbar'
 import { CLASSIFYS } from '@/config'
+import { showToast } from '@/utils'
 export default {
   data () {
     return {
@@ -62,11 +63,8 @@ export default {
     getSongList (type = this.tabIndex) {
       let config = this.tabConfigs[type]
       if (config.noData) {
-        this.showToast({
-          title: '无更多内容',
-          icon: 'none',
-          mask: true,
-          time: 1000
+        showToast({
+          title: '无更多内容'
         })
         return false
       }
@@ -83,11 +81,8 @@ export default {
       }).then(res => {
         let data = res.result.data
         if (data.length <= 0) {
-          this.showToast({
-            title: '无更多内容',
-            icon: 'none',
-            mask: false,
-            time: 1000
+          showToast({
+            title: '无更多内容'
           })
           config.noData = true
           return false
@@ -98,25 +93,11 @@ export default {
           wx.hideLoading()
         })
       }, err => {
-        this.showToast({
-          title: '数据获取失败',
-          icon: 'none',
-          mask: false,
-          time: 1000
+        showToast({
+          title: '数据获取失败'
         })
         console.log(err)
       })
-    },
-    showToast (options) {
-      wx.showToast({
-        title: options.title,
-        icon: options.icon,
-        mask: options.mask
-      })
-      let timer = setTimeout(() => {
-        clearTimeout(timer)
-        wx.hideToast()
-      }, options.time)
     },
     switchTab (e, index) {
       this.tabIndex = index
@@ -141,11 +122,9 @@ export default {
     },
     getMoreData (e) {
       if (this.tabConfigs[this.tabIndex].noData) {
-        this.showToast({
+        showToast({
           title: '无更多内容',
-          icon: 'none',
-          mask: true,
-          time: 1000
+          mask: true
         })
         return false
       }

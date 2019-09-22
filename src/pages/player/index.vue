@@ -64,7 +64,7 @@ import lyric from '@/components/lyric'
 import xhtopbar from '@/components/topbar'
 // import axios from 'axios'
 import {mapState} from 'vuex'
-import {getSongTimeStr} from '@/utils'
+import {getSongTimeStr, showToast} from '@/utils'
 
 export default {
 
@@ -76,6 +76,7 @@ export default {
       isShowControlTime: false,
       isPlay: false,
       songInfo: {
+        id: 0,
         title: 'X音乐',
         musicSrc: '',
         singer: '',
@@ -112,6 +113,7 @@ export default {
       }).then(res => {
         let data = res.result
         this.songInfo = {
+          id: data._id,
           musicSrc: data.musicSrc,
           singer: data.singer,
           imgSrc: data.imgSrc,
@@ -255,16 +257,23 @@ export default {
   },
 
   computed: {
-    ...mapState(['audioManager', 'topbarHeight', 'systemInfo', 'playList']),
-    songid () {
+    ...mapState(['audioManager', 'topbarHeight', 'systemInfo']),
+    playList () {
       let songid = this.$store.state.songid
+      let playList = this.$store.state.playList
       if (songid && songid.length > 0) {
-        for (let i in this.playList) {
-          if (this.playList[i]._id === songid) {
+        for (let i in playList) {
+          if (playList[i]._id === songid) {
             this.playIndex = i
             break
           }
         }
+      }
+      return playList
+    },
+    songid () {
+      let songid = this.$store.state.songid
+      if (songid && songid.length > 0) {
         this.play(songid)
       }
       return songid
@@ -294,6 +303,19 @@ export default {
     })
     this.audioManager.onError((err) => {
       console.log(err)
+      showToast({
+        title: '数据获取失败,马上为您播放下一首'
+      })
+      let timer = setTimeout(() => {
+        this.next()
+        clearTimeout(timer)
+      }, 1000)
+    })
+    this.audioManager.onNext(() => {
+      this.next()
+    })
+    this.audioManager.onPrev(() => {
+      this.prev()
     })
     if (this.playList.length <= 0) {
       this.getSongList()

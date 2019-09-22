@@ -75,6 +75,9 @@ export default {
       }
     },
     findLyricIndex (time) {
+      if (!this.lyricArr[this.lyricIndex]) {
+        return false
+      }
       if (this.lyricIndex >= this.lyricArr.length) {
         this.lyricIndex--
       }
@@ -115,9 +118,11 @@ export default {
       if (this.lyricIndex >= this.lyricArr.length) {
         return false
       }
-      let sTime = this.lyricArr[this.lyricIndex].time
-      if (value + 0.4 > sTime) {
-        this.lyricIndex++
+      if (this.lyricArr[this.lyricIndex]) {
+        let sTime = this.lyricArr[this.lyricIndex].time
+        if (value + 0.4 > sTime) {
+          this.lyricIndex++
+        }
       }
     },
     lyric (value, oldValue) {

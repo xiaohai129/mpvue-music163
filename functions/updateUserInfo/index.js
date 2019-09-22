@@ -9,6 +9,9 @@ exports.main = async (event, context) => {
   return await db.collection('users').where({ _id: userInfo.openid}).get().then(res => {
     let data = {}
     if(res && res.data.length>0){
+      if (!userInfo.openid) {
+        return false
+      }
       return db.collection('users').where({
         _id: userInfo.openid
       }).update({
