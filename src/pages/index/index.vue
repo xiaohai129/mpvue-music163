@@ -23,8 +23,9 @@
         <scroll-view class="scroll_wrap" 
           scroll-y='true'
           @scrolltolower='getMoreData'
+          v-if="index < 4"
         >
-          <div class="song_item" 
+          <div class="song_item"
             v-for="(item, rank) in config.data" :key="rank"
             @click="playMusic($event, item._id)"
           >
@@ -33,6 +34,20 @@
             <div class="text_wrap">
               <h2>{{item.title}}</h2>
               <p>{{item.singer}}</p>
+            </div>
+          </div>
+        </scroll-view>
+        <scroll-view class="scroll_wrap" 
+          scroll-y='true'
+          @scrolltolower='getMoreData'
+          v-if="index == 4"
+        >
+          <div class="song_item" v-for="(item, rank) in singerList" :key="rank">
+            <span class="rank">{{ rank+1 }}</span>
+            <img :src="''"/>
+            <div class="text_wrap">
+              <h2>{{item._id}}</h2>
+              <p>{{item.count}}首</p>
             </div>
           </div>
         </scroll-view>
@@ -52,7 +67,8 @@ export default {
     return {
       tabTextList: CLASSIFYS,
       tabIndex: 0,
-      tabConfigs: []
+      tabConfigs: [],
+      singerList: []
     }
   },
   components: {
@@ -80,7 +96,13 @@ export default {
         }
       }).then(res => {
         let data = res.result.data
-        if (data.length <= 0) {
+        if (!res.result.data) {
+          showToast({
+            title: '数据获取失败'
+          })
+          return false
+        }
+        if (data && data.length <= 0) {
           showToast({
             title: '无更多内容'
           })
@@ -117,7 +139,11 @@ export default {
       let index = e.target.current
       this.tabIndex = index
       if (this.tabConfigs[index].data.length <= 0) {
-        this.getSongList()
+        if (index === 4) {
+          this.getSingerList()
+        } else {
+          this.getSongList()
+        }
       }
     },
     getMoreData (e) {
@@ -128,11 +154,41 @@ export default {
         })
         return false
       }
-      this.getSongList()
+      if (this.tabIndex === 4) {
+        this.getSingerList()
+      } else {
+        this.getSongList()
+      }
     },
     gotoSearchPage () {
       wx.navigateTo({
         url: '/pages/search/main'
+      })
+    },
+    getSingerList (type = this.tabIndex) {
+      let config = this.tabConfigs[type]
+      if (config.noData) {
+        showToast({
+          title: '无更多内容'
+        })
+        return false
+      }
+      wx.cloud.callFunction({
+        name: 'getSingerList',
+        data: {
+          page: config.page
+        }
+      }).then(res => {
+        let singerList = res.result.list
+        if (singerList && singerList.length <= 0) {
+          showToast({
+            title: '无更多内容'
+          })
+          config.noData = true
+          return false
+        }
+        this.singerList = this.singerList.concat(singerList)
+        config.page++
       })
     }
   },
