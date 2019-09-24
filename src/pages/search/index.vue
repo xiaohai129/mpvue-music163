@@ -95,6 +95,7 @@ export default {
       this.searchHistorys = [keywords].concat(this.searchHistorys)
       wx.setStorageSync('searchHistorys', this.searchHistorys.join(','))
       if (keywords && datas) {
+        this.keywords = ''
         wx.navigateTo({
           url: '/pages/search_details/main?keywords=' + keywords + '&type=' + type + '&data=' + datas
         })
@@ -221,8 +222,9 @@ export default {
   }
   .search_item .right{
     color: rgba($color: #000000, $alpha: 0.3);
-    width: 50px;
-    text-align: center;
+    width: 90px;
+    text-align: right;
+    padding-right: 20px;
   }
 }
 .serching_list{

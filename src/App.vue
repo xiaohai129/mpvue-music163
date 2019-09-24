@@ -4,7 +4,9 @@ export default {
     this.$store.dispatch('getSystemInfo')
     this.$store.dispatch('getAudioManager')
     this.$store.dispatch('getTopbarHeight')
-    wx.setStorageSync('songImg', '/static/images/player/disc_default.png')
+    this.$store.dispatch('login')
+  },
+  mounted () {
     wx.hideTabBar()
   }
 }

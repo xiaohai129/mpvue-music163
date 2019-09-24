@@ -1,11 +1,12 @@
 {
   "pages": [
     "pages/index/main",
-    "pages/personal/main",
     "pages/mine/main",
+    "pages/like_list/main",
+    "pages/player/main",
+    "pages/personal/main",
     "pages/search/main",
-    "pages/search_details/main",
-    "pages/player/main"
+    "pages/search_details/main"
   ],
   "window": {
     "backgroundTextStyle": "light",

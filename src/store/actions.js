@@ -51,7 +51,7 @@ export default {
     })
   },
   setUserInfo (context, userInfo) {
-    wx.cloud.callFunction({
+    return wx.cloud.callFunction({
       name: 'updateUserInfo',
       data: {
         userInfo: userInfo

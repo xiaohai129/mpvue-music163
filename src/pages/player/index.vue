@@ -35,11 +35,16 @@
         />
         <div class="control_wrap">
           <div class="play_control_btns">
+            <div class="iconfont icon-liebiao"></div>
             <div class="iconfont icon-shangyishou" @click="prev"></div>
             <div :class="'iconfont play_btn ' + (isPlay?'icon-zanting':'icon-bofang')"
                   @click='switchPlayStatis'
             ></div>
             <div class="iconfont icon-xiayishou" @click="next"></div>
+            <div 
+              :class="['iconfont','icon-xihuan2','like_btn',{'active':isSongLike}]"
+              @click="userLike"
+            ></div>
           </div>
           <div class="play_progress">
             <span>{{currentValueStr}}</span>
@@ -84,6 +89,9 @@ export default {
         lyric: '',
         size: 0
       },
+      isSongLike: false,
+      userId: '',
+      likeList: [],
       maskBgImg: '',
       playTimer: null,
       playIndex: 0,
@@ -98,13 +106,13 @@ export default {
 
   methods: {
     play (songid) {
+      if (!songid) {
+        return false
+      }
       wx.showLoading({
         title: '正在获取数据',
         mask: true
       })
-      if (!songid) {
-        songid = this.playList[this.playIndex]._id
-      }
       return wx.cloud.callFunction({
         name: 'getSongInfo',
         data: {
@@ -131,8 +139,24 @@ export default {
           songImg: this.songInfo.imgSrc,
           isPlay: true
         })
+        let strIndex = this.playRecord.indexOf(songid)
+        if (strIndex >= 0) {
+          this.playRecord = this.playRecord.substr(0, strIndex) + this.playRecord.substr(this.playRecord.indexOf(',', strIndex) + 1)
+        }
+        this.playRecord = songid + ',' + this.playRecord
+        wx.setStorage({
+          key: 'play_record',
+          data: this.playRecord
+        })
+        if (this.isLogin && (new Date().getTime() - this.playTimes) >= 3600000) {
+          let userInfo = Object.assign({}, this.userInfo, {integral: this.userInfo.integral + 1})
+          this.$store.dispatch('setUserInfo', userInfo)
+        }
         wx.hideLoading()
         return res
+      }, err => {
+        console.log(err)
+        wx.hideLoading()
       })
     },
     pause () {
@@ -148,7 +172,7 @@ export default {
       } else {
         this.playIndex = 0
       }
-      this.play()
+      this.$store.dispatch('setSongid', this.playList[this.playIndex]._id)
     },
     prev () {
       if (this.limitClick()) {
@@ -159,7 +183,7 @@ export default {
       } else {
         this.playIndex = this.playList.length - 1
       }
-      this.play()
+      this.$store.dispatch('setSongid', this.playList[this.playIndex]._id)
     },
     seek (time) {
       if (time > 0) {
@@ -182,7 +206,7 @@ export default {
           this.audioManager.play()
           isPlay = true
         } else {
-          this.play()
+          this.$store.dispatch('setSongid', this.playList[this.playIndex]._id)
           return true
         }
       } else {
@@ -234,6 +258,29 @@ export default {
         this.$store.dispatch('setPlayList', data)
         wx.hideLoading()
       })
+    },
+    userLike () {
+      if (this.songid.length <= 0) {
+        return false
+      }
+      if (this.isSongLike) {
+        for (let i in this.likeList) {
+          if (this.likeList[i] === this.songid) {
+            this.likeList.splice(i, 1)
+            break
+          }
+        }
+      } else {
+        this.likeList.push(this.songid)
+      }
+      wx.cloud.callFunction({
+        name: 'updateLikeList',
+        data: {
+          list: this.likeList
+        }
+      })
+      this.isSongLike = !this.isSongLike
+      return false
     }
   },
 
@@ -253,11 +300,19 @@ export default {
       } else {
         clearInterval(this.playTimer)
       }
+    },
+    songid (value, oldValue) {
+      this.isSongLike = false
+      for (let i in this.likeList) {
+        if (this.likeList[i] === value) {
+          this.isSongLike = true
+        }
+      }
     }
   },
 
   computed: {
-    ...mapState(['audioManager', 'topbarHeight', 'systemInfo']),
+    ...mapState(['audioManager', 'topbarHeight', 'systemInfo', 'userInfo', 'isLogin']),
     playList () {
       let songid = this.$store.state.songid
       let playList = this.$store.state.playList
@@ -276,7 +331,7 @@ export default {
       if (songid && songid.length > 0) {
         this.play(songid)
       }
-      return songid
+      return songid || ''
     },
     playerStyle () {
       return `
@@ -319,6 +374,18 @@ export default {
     })
     if (this.playList.length <= 0) {
       this.getSongList()
+    }
+    wx.cloud.callFunction({
+      name: 'updateLikeList'
+    }).then(res => {
+      this.userId = res.result.data[0]._id
+      this.likeList = res.result.data[0].list
+    })
+    this.playRecord = wx.getStorageSync('play_record')
+    this.playTimes = parseInt(wx.getStorageSync('play_times')) || 0
+    if (this.playTimes <= 0) {
+      this.playTimes = new Date().getTime()
+      wx.setStorageSync('play_times', this.playTimes)
     }
   },
 
@@ -452,7 +519,7 @@ export default {
       color: #fff;
       display: flex;
       justify-content: space-between;
-      width: 190px;
+      width: 260px;
       line-height: 32px;
       margin: 20px auto;
       .iconfont{
@@ -461,6 +528,12 @@ export default {
       .play_btn{
         font-size: 32px;
         color:$main-color;
+      }
+      .like_btn{
+        font-size: 22px;
+        &.active{
+          color: $main-color;
+        }
       }
     }
     .play_progress{

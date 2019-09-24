@@ -42,7 +42,10 @@
           @scrolltolower='getMoreData'
           v-if="index == 4"
         >
-          <div class="song_item" v-for="(item, rank) in singerList" :key="rank">
+          <div class="song_item" v-for="(item, rank) in singerList" 
+            :key="rank"
+            @click="gotoSingerPage($evnet,item._id)"
+          >
             <span class="rank">{{ rank+1 }}</span>
             <img :src="''"/>
             <div class="text_wrap">
@@ -189,6 +192,11 @@ export default {
         }
         this.singerList = this.singerList.concat(singerList)
         config.page++
+      })
+    },
+    gotoSingerPage (e, singer) {
+      wx.navigateTo({
+        url: '/pages/search_details/main?type=singer&mode=1&keywords=' + singer
       })
     }
   },

@@ -1,10 +1,7 @@
 <template>
   <div class="layout">
-    <div class="title">
-      <p v-if="searchInfo.type == 'song'">为您找到关于"{{searchInfo.keywords}}"的歌曲</p>
-      <p v-else-if="searchInfo.type == 'singer'">为您找到歌手"{{searchInfo.keywords}}"的歌曲</p>
-    </div>
-    <div class="song_item" 
+    <div class="add_btn" @click="gotoIndex" v-show="songList.length <= 0">立即播放</div>
+    <div class="song_item"
       v-for="(item, rank) in songList" :key="rank"
       @click="playMusic($event, item._id)"
     >
@@ -22,15 +19,17 @@
 export default {
   data () {
     return {
-      songList: [],
-      searchInfo: {}
+      songList: [{}]
     }
   },
 
-  components: {
-  },
-
   methods: {
+    gotoIndex () {
+      console.log(1212)
+      wx.switchTab({
+        url: '/pages/index/main'
+      })
+    },
     playMusic (e, id) {
       this.$store.dispatch('setPlayList', this.songList).then(res => {
         return this.$store.dispatch('setSongid', id)
@@ -39,11 +38,21 @@ export default {
           url: '/pages/player/main'
         })
       })
-    },
-    getSongList (ids) {
-      if (typeof (ids) === 'string') {
-        ids = ids.split(',')
-      }
+    }
+  },
+
+  components: {
+  },
+
+  onShow () {
+    wx.showLoading({
+      title: '正在获取数据',
+      mask: true
+    })
+    let playRecord = wx.getStorageSync('play_record')
+    if (playRecord.length > 0) {
+      playRecord = playRecord.substr(0, playRecord.length - 1)
+      let ids = playRecord.split(',')
       wx.cloud.callFunction({
         name: 'getSongList',
         data: {
@@ -51,49 +60,29 @@ export default {
         }
       }).then(res => {
         this.songList = res.result.data
-        if (this.songList.length === 1) {
-          this.playMusic(null, this.songList[0]._id)
-        }
+        wx.hideLoading()
       })
+    } else {
+      this.songList = []
     }
-  },
-
-  created () {
-
-  },
-  mounted () {
-    const pages = getCurrentPages()
-    const currentPage = pages[pages.length - 1]
-    const options = currentPage.options
-    this.searchInfo = {
-      type: options.type,
-      keywords: options.keywords
-    }
-    this.searchType = options.type
-    if (parseInt(options.mode) === 1) {
-      wx.cloud.callFunction({
-        name: 'searchInfo',
-        data: {
-          keywords: options.keywords
-        }
-      }).then(res => {
-        let searchData = res.result.singers[0]
-        this.getSongList(searchData.list)
-      })
-      return false
-    }
-    this.getSongList(options.data)
+    wx.hideLoading()
   }
 }
 </script>
 
 <style lang='scss' scoped>
-.title{
+.add_btn{
+  width: 80%;
+  height: 40px;
+  border-radius: 20px;
   background-color: $main-color;
-  font-size: 14px;
   color: #fff;
-  padding-left: 10px;
-  line-height: 30px;
+  text-align: center;
+  line-height: 40px;
+  font-size: 16px;
+  position:absolute;
+  bottom: 50%;
+  left: 10%;
 }
 .song_item{
   display: flex;

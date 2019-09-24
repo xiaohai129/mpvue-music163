@@ -6,28 +6,36 @@ const db = cloud.database()
 // 云函数入口函数
 exports.main = async (event, context) => {
   let userInfo = event.userInfo
-  return await db.collection('users').where({ _id: userInfo.openid}).get().then(res => {
+  return await db.collection('users').where({ _id: userInfo._id}).get().then(res => {
     let data = {}
     if(res && res.data.length>0){
-      if (!userInfo.openid) {
+      if (!userInfo._id) {
         return false
       }
       return db.collection('users').where({
-        _id: userInfo.openid
+        _id: userInfo._id
       }).update({
         data: {
           'avatarUrl': userInfo.avatarUrl,
-          'grade': userInfo.grade,
-          'nickName': userInfo.nickName
+          'gender': userInfo.gender,
+          'nickName': userInfo.nickName,
+          'integral': userInfo.integral
         }
+      }).then(res => {
+        return userInfo
       })
     }else{
+      db.collection('likes').add({
+        data: {
+          '_id': userInfo.openid,
+          'list': []
+        }
+      })
       return db.collection('users').add({
         data: {
           '_id': userInfo.openid,
           'avatarUrl': userInfo.avatarUrl,
           'gender': userInfo.gender,
-          'grade': 1,
           'integral': 0,
           'nickName': userInfo.nickName
         }

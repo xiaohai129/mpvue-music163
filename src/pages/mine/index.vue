@@ -2,11 +2,11 @@
   <div class="layout">
     <div class="top_wrap">
       <div class="top_bg"></div>
-      <div class="content">
+      <div class="content" @click="gotoPage($evnet,{url:'/pages/like_list/main'})">
         <div class="avatar_wrap">
           <img class="avatar" :src="userInfo.avatarUrl"/>
           <div class="grade_wrap">
-            <img v-if="userInfo && userInfo.grade>0" src="/static/images/mine/icon_vip_active.png"/>
+            <img v-if="userInfo && userInfo.integral>0" src="/static/images/mine/icon_vip_active.png"/>
             <img v-else src="/static/images/mine/icon_vip_close.png"/>
           </div>
         </div>
@@ -33,15 +33,15 @@
     <div class="content_wrap">
       <div class="content">
         <div class="action_btns">
-          <div class="item_btn">
+          <div class="item_btn" @click="gotoPage($evnet,{url:'/pages/like_list/main'})">
             <img src="/static/images/mine/icon_like.png"/>
             <p>我的喜欢</p>
           </div>
-          <div class="item_btn">
+          <div class="item_btn" @click="gotoPage($evnet,{url:'/pages/play_record/main'})">
             <img src="/static/images/mine/icon_history.png"/>
             <p>播放记录</p>
           </div>
-          <div class="item_btn">
+          <div class="item_btn" @click="download">
             <img src="/static/images/mine/icon_download.png"/>
             <p>下载歌曲</p>
           </div>
@@ -68,9 +68,12 @@
 import {mapState} from 'vuex'
 import xhtabbar from '@/components/tabbar'
 import {GRADE} from '@/config'
+import { showToast } from '@/utils'
+
 export default {
   data () {
     return {
+      gradeValue: 0
     }
   },
   components: {
@@ -78,13 +81,11 @@ export default {
   },
   computed: {
     ...mapState(['userInfo', 'isLogin']),
-    gradeValue () {
-      return GRADE[this.userInfo.grade - 1] || 0
-    },
     integralPercent () {
+      this.getGradeValue()
       if (this.gradeValue) {
         let integral = this.userInfo.integral
-        return (this.grade / integral).toFixed(2)
+        return (integral / this.gradeValue).toFixed(2) * 100
       } else {
         return 0
       }
@@ -103,6 +104,9 @@ export default {
       }
     },
     gotoPage (e, options) {
+      if (!this.isLogin) {
+        return false
+      }
       let params = ''
       if (options.data) {
         let data = []
@@ -114,19 +118,41 @@ export default {
       wx.navigateTo({
         url: options.url + params
       })
+    },
+    download () {
+      showToast({
+        title: '无权限下载'
+      })
+    },
+    getGradeValue () {
+      if (!this.isLogin) {
+        return false
+      }
+      let integral = parseInt(this.userInfo.integral)
+      let grade = 0
+      if (integral > 0) {
+        for (let i in GRADE) {
+          integral -= GRADE[i]
+          if (integral < GRADE[i]) {
+            grade = i
+            break
+          }
+        }
+      }
+      this.gradeValue = GRADE[grade]
     }
   },
   created () {
-    wx.showToast({
-      title: '正在获取数据',
-      icon: 'loading',
-      mask: true
-    })
-  },
-  mounted () {
-    this.$store.dispatch('login').then(res => {
-      wx.hideToast()
-    })
+    if (this.userInfo.openid.length <= 0) {
+      wx.showToast({
+        title: '正在获取数据',
+        icon: 'loading',
+        mask: true
+      })
+      this.$store.dispatch('login').then(res => {
+        wx.hideToast()
+      })
+    }
   }
 }
 </script>
@@ -200,7 +226,7 @@ export default {
         font-weight: bold;
       }
       .integral_bar{
-        width: 200px;
+        width: 190px;
         height: 8px;
         border-radius: 4px;
         overflow: hidden;
@@ -208,6 +234,7 @@ export default {
         box-shadow: 0 0 2px inset rgba($color: #fff, $alpha: 0.5);
         margin-top: 15px;
         position: relative;
+        border: 1px solid rgba($color: #fff, $alpha: 0.3);
         .current_value_bar{
           width: 0%;
           height: 100%;
@@ -219,13 +246,13 @@ export default {
         }
         &.fading_bar{
           box-shadow: none;
-          background-color:#8a8a8a;
+          background-color:rgba($color: #000000, $alpha: 0.2);
         }
       }
       .integral_text{
         position: absolute;
-        left: 220px;
-        bottom: 4px;
+        left: 218px;
+        bottom: 6px;
         font-size: 12px;
         white-space: nowrap;
       }
