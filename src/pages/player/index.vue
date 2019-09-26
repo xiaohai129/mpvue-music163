@@ -35,7 +35,7 @@
         />
         <div class="control_wrap">
           <div class="play_control_btns">
-            <div class="iconfont icon-liebiao"></div>
+            <div class="iconfont icon-liebiao" @click="showPlayList"></div>
             <div class="iconfont icon-shangyishou" @click="prev"></div>
             <div :class="'iconfont play_btn ' + (isPlay?'icon-zanting':'icon-bofang')"
                   @click='switchPlayStatis'
@@ -59,12 +59,14 @@
         </div>
       </div>
     </div>
+    <songList :songList='playList' ref="songList"/>
   </div>
 </template>
 
 <script>
 import circularProgress from '@/components/circular_progress'
 import xhslider from '@/components/slider'
+import songList from '@/components/song_list'
 import lyric from '@/components/lyric'
 import xhtopbar from '@/components/topbar'
 // import axios from 'axios'
@@ -263,6 +265,7 @@ export default {
       if (this.songid.length <= 0) {
         return false
       }
+      this.isSongLike = !this.isSongLike
       if (this.isSongLike) {
         for (let i in this.likeList) {
           if (this.likeList[i] === this.songid) {
@@ -279,8 +282,10 @@ export default {
           list: this.likeList
         }
       })
-      this.isSongLike = !this.isSongLike
       return false
+    },
+    showPlayList () {
+      this.$refs.songList.$emit('show')
     }
   },
 
@@ -288,7 +293,8 @@ export default {
     circularProgress,
     xhslider,
     lyric,
-    xhtopbar
+    xhtopbar,
+    songList
   },
 
   watch: {

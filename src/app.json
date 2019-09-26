@@ -2,8 +2,8 @@
   "pages": [
     "pages/index/main",
     "pages/mine/main",
-    "pages/like_list/main",
     "pages/player/main",
+    "pages/like_list/main",
     "pages/personal/main",
     "pages/search/main",
     "pages/search_details/main"

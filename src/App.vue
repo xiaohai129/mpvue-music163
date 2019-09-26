@@ -8,6 +8,9 @@ export default {
   },
   mounted () {
     wx.hideTabBar()
+  },
+  onShow () {
+    wx.hideTabBar()
   }
 }
 </script>

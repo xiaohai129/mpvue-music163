@@ -24,17 +24,21 @@
           scroll-y='true'
           @scrolltolower='getMoreData'
           v-if="index < 4"
+          :style="scrollViewStyle"
         >
           <div class="song_item"
             v-for="(item, rank) in config.data" :key="rank"
             @click="playMusic($event, item._id)"
           >
-            <span class="rank">{{rank+1}}</span>
-            <img :src="item.imgSrc"/>
-            <div class="text_wrap">
-              <h2>{{item.title}}</h2>
-              <p>{{item.singer}}</p>
+            <div class="left">
+              <span class="rank">{{rank+1}}</span>
+              <img :src="item.imgSrc"/>
+              <div class="text_wrap">
+                <h2>{{item.title}}</h2>
+                <p>{{item.singer}}</p>
+              </div>
             </div>
+            <div class="time">{{item.timeStr}}</div>
           </div>
         </scroll-view>
         <scroll-view class="scroll_wrap" 
@@ -46,11 +50,13 @@
             :key="rank"
             @click="gotoSingerPage($evnet,item._id)"
           >
-            <span class="rank">{{ rank+1 }}</span>
-            <img :src="''"/>
-            <div class="text_wrap">
-              <h2>{{item._id}}</h2>
-              <p>{{item.count}}首</p>
+            <div class="left">
+              <span class="rank">{{ rank+1 }}</span>
+              <img :src="''"/>
+              <div class="text_wrap">
+                <h2>{{item._id}}</h2>
+                <p>{{item.count}}首</p>
+              </div>
             </div>
           </div>
         </scroll-view>
@@ -64,7 +70,7 @@
 import xhtopbar from '@/components/topbar'
 import xhtabbar from '@/components/tabbar'
 import { CLASSIFYS } from '@/config'
-import { showToast } from '@/utils'
+import { showToast, getSongTimeStr } from '@/utils'
 export default {
   data () {
     return {
@@ -111,6 +117,9 @@ export default {
           })
           config.noData = true
           return false
+        }
+        for (let i in data) {
+          data[i].timeStr = getSongTimeStr(data[i].size)
         }
         config.data = this.tabConfigs[type].data.concat(data)
         config.page++
@@ -198,6 +207,15 @@ export default {
       wx.navigateTo({
         url: '/pages/search_details/main?type=singer&mode=1&keywords=' + singer
       })
+    }
+  },
+  computed: {
+    scrollViewStyle () {
+      let systemInfo = this.$store.state.systemInfo
+      return `
+        height:calc(100% - ${systemInfo.statusBarHeight}PX);
+        margin-top:${systemInfo.statusBarHeight}PX;
+      `
     }
   },
   created () {
@@ -290,18 +308,23 @@ export default {
   }
 }
 .tabbar_content{
-  padding-top: 100px;
+  padding-top: 85px;
   height: 100%;
   box-sizing: border-box;
   .scroll_wrap{
     height: 100%;
     .song_item{
       display: flex;
-      justify-content: left;
+      justify-content: space-between;
       align-items: center;
       overflow: hidden;
       padding:5px 10px 5px 0;
       border-bottom: 1PX dashed rgba($color: #ccc, $alpha: 0.6);
+      .left{
+        display: flex;
+        justify-content: left;
+        align-items: center;
+      }
       .rank{
         font-size: 12px;
         color: #999;
@@ -319,6 +342,10 @@ export default {
       }
       h2{
         font-size: 16px;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        max-width: 220px;
       }
       p{
         font-size: 12px;
@@ -330,6 +357,11 @@ export default {
       &:last-of-type{
         border: none;
         padding-bottom: 54PX;
+      }
+      .time{
+        float: right;
+        font-size: 12px;
+        color: rgba($color: #000, $alpha: 0.6);
       }
     }
   }

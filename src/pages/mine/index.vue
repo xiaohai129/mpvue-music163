@@ -2,16 +2,16 @@
   <div class="layout">
     <div class="top_wrap">
       <div class="top_bg"></div>
-      <div class="content" @click="gotoPage($evnet,{url:'/pages/like_list/main'})">
+      <div class="content" @click="gotoPage($evnet,{url:'/pages/personal/main'})">
         <div class="avatar_wrap">
           <img class="avatar" :src="userInfo.avatarUrl"/>
           <div class="grade_wrap">
-            <img v-if="userInfo && userInfo.integral>0" src="/static/images/mine/icon_vip_active.png"/>
+            <img v-if="userInfo && userInfo.integral>0" src="/static/images/mine/icon_vip_active.png">
             <img v-else src="/static/images/mine/icon_vip_close.png"/>
           </div>
         </div>
         <div class="userinfo">
-          <p v-if="isLogin" class="nickName" >{{userInfo.nickName}}</p>
+          <div v-if="isLogin" class="nickName" >{{userInfo.nickName}}<div class="vip_box">VIP{{userInfo.grade}}</div></div>
           <button v-else 
             open-type='getUserInfo' 
             class="getUserInfo_btn"
@@ -21,12 +21,12 @@
             <open-data type="userNickName"></open-data>
             <open-data type="userCity"></open-data>
           </button>
+          <div class="integral_text" v-show="isLogin">
+            {{userIntegral}} / {{gradeValue}}
+          </div>
           <div :class="{fading_bar:!isLogin,integral_bar:true}">
             <div class="current_value_bar" :style="{width:integralPercent+'%'}"></div>
           </div>
-          <span class="integral_text" v-show="isLogin">
-            {{userInfo.integral}} / {{gradeValue}}
-          </span>
         </div>
       </div>
     </div>
@@ -81,11 +81,16 @@ export default {
   },
   computed: {
     ...mapState(['userInfo', 'isLogin']),
+    userIntegral () {
+      if (this.gradeValue) {
+        return this.userInfo.integral % this.gradeValue
+      }
+      return this.userInfo.integral
+    },
     integralPercent () {
       this.getGradeValue()
       if (this.gradeValue) {
-        let integral = this.userInfo.integral
-        return (integral / this.gradeValue).toFixed(2) * 100
+        return (this.userIntegral / this.gradeValue).toFixed(2) * 100
       } else {
         return 0
       }
@@ -139,6 +144,7 @@ export default {
           }
         }
       }
+      this.userInfo.grade = grade
       this.gradeValue = GRADE[grade]
     }
   },
@@ -211,7 +217,7 @@ export default {
       .grade_wrap{
         position:absolute;
         bottom: 0;
-        right: -2px;
+        right: 0px;
         width: 20px;
         height: 20px;
       }
@@ -221,9 +227,22 @@ export default {
       padding-top: 6px;
       box-sizing: border-box;
       position: relative;
+      height: 50px;
       .nickName{
         font-size: 16px;
         font-weight: bold;
+      }
+      .vip_box{
+        background: linear-gradient(to left,#ff5806,#f5b617);
+        color: #fce587;
+        height: 14px;
+        border-radius: 7px;
+        float: right;
+        font-size: 10px;
+        width: 40px;
+        text-align: center;
+        margin-left: 10px;
+        margin-top: 4px;
       }
       .integral_bar{
         width: 190px;
@@ -233,8 +252,10 @@ export default {
         background-color: $second-color;
         box-shadow: 0 0 2px inset rgba($color: #fff, $alpha: 0.5);
         margin-top: 15px;
-        position: relative;
+        position: absolute;
+        bottom: 4px;
         border: 1px solid rgba($color: #fff, $alpha: 0.3);
+        box-sizing: border-box;
         .current_value_bar{
           width: 0%;
           height: 100%;
@@ -252,7 +273,7 @@ export default {
       .integral_text{
         position: absolute;
         left: 218px;
-        bottom: 6px;
+        bottom: 0px;
         font-size: 12px;
         white-space: nowrap;
       }
