@@ -56,3 +56,20 @@ export function showToast (options) {
     wx.hideToast()
   }, options.time || 1000)
 }
+
+export function showModal (params) {
+  return new Promise((resolve, reject) => {
+    wx.showModal({
+      title: params.title,
+      content: params.content,
+      showCancel: true,
+      confirmColor: '#fd4545',
+      success: (res) => {
+        resolve(res)
+      },
+      fail: (err) => {
+        reject(err)
+      }
+    })
+  })
+}

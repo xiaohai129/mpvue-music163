@@ -11,7 +11,7 @@
         {{list[0].text}}
       </div>
       <div class='tabbar_item player-min' @click='gotoPage($event,list[1].pagePath)'>
-        <img :class="['song_img',{'playing':tabbarPlayInfo.isPlay}]" :src="tabbarPlayInfo.songImg"/>
+        <img :class="['song_img',{'playing':(tabbarPlayInfo.isPlay && settings[1] == 1)}]" :src="tabbarPlayInfo.songImg"/>
       </div>
       <div :class="['tabbar_item',{'item_selected':selectIndex==2}]" @click='gotoPage($event,list[2].pagePath)'>
         <img class="item_icon" :src="list[2].iconPath"/>
@@ -40,7 +40,8 @@ export default {
         iconPath: '/static/tabs/icon_mine_n.png',
         selectedIconPath: '/static/tabs/icon_mine_a.png'
       }],
-      selectIndex: 0
+      selectIndex: 0,
+      settings: []
     }
   },
   methods: {
@@ -51,7 +52,7 @@ export default {
     }
   },
   computed: {
-    ...mapState(['tabbarPlayInfo'])
+    ...mapState(['tabbarPlayInfo', 'settings'])
   },
   mounted () {
     let page = getCurrentPages()

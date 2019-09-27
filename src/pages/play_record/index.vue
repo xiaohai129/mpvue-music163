@@ -2,7 +2,7 @@
   <div class="layout">
     <div class="add_btn" @click="gotoIndex" v-show="songList.length <= 0">立即播放</div>
     <div class="song_item"
-      v-for="(item, rank) in songList" :key="rank"
+      v-for="(item, rank) in songList" :key="item"
       @click="playMusic($event, item._id)"
     >
       <span class="rank">{{rank+1}}</span>
@@ -25,7 +25,6 @@ export default {
 
   methods: {
     gotoIndex () {
-      console.log(1212)
       wx.switchTab({
         url: '/pages/index/main'
       })

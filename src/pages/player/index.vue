@@ -8,7 +8,7 @@
         </p>
       </div>
     </xhtopbar>
-    <div :class="[{'played':isPlay},'player_wrap',{'clean_player_mode':lyricMode=='full'}]">
+    <div :class="[{'played':isPlay},{'play-anim':settings[1] == 1},'player_wrap',{'clean_player_mode':lyricMode=='full'}]">
       <div class="player_mask" :style="{backgroundImage:'url(' + (maskBgImg || '') + ')'}">
         <div class="mask_black"></div>
       </div>
@@ -22,6 +22,7 @@
             :currentValue='currentValue'
             :countValue='countValue'
             :isShow='lyricMode=="small"'
+            v-if="settings[1] == 1"
           />
           <cover-view class="play_btn_mask" @click="switchPlayStatis">
             <cover-image class="icon_play" src="/static/images/player/icon-play.png"/>
@@ -32,6 +33,7 @@
           :currentTime='currentValue'
           ref="lyric"
           @change="lyricShowChange"
+          v-if="settings[0] == 1"
         />
         <div class="control_wrap">
           <div class="play_control_btns">
@@ -102,7 +104,8 @@ export default {
       ShowControlTimer: null,
       needleTimer: null,
       timer: null,
-      lyricMode: 'small'
+      lyricMode: 'small',
+      settings: []
     }
   },
 
@@ -190,7 +193,9 @@ export default {
     seek (time) {
       if (time > 0) {
         this.audioManager.seek(time)
-        this.$refs.lyric.findLyricIndex(time)
+        if (parseInt(this.settings[0]) === 1) {
+          this.$refs.lyric.findLyricIndex(time)
+        }
       }
     },
     sliderChange (time) {
@@ -318,7 +323,7 @@ export default {
   },
 
   computed: {
-    ...mapState(['audioManager', 'topbarHeight', 'systemInfo', 'userInfo', 'isLogin']),
+    ...mapState(['audioManager', 'topbarHeight', 'systemInfo', 'userInfo', 'isLogin', 'settings']),
     playList () {
       let songid = this.$store.state.songid
       let playList = this.$store.state.playList
@@ -403,7 +408,10 @@ export default {
     if (typeof (this.audioManager.paused) !== 'undefined' && !this.audioManager.paused) {
       this.isPlay = true
       this.currentValue = this.audioManager.currentTime
-      this.$refs.lyric.findLyricIndex(this.currentValue)
+      console.log()
+      if (parseInt(this.settings[0]) === 1) {
+        this.$refs.lyric.findLyricIndex(this.currentValue)
+      }
     }
   }
 }
@@ -428,11 +436,13 @@ export default {
   left: 0;
   // 音乐播放状态
   &.played{
-    .song_img{
-      animation-play-state:running !important;
-    }
     .play_btn_mask{
       display: none !important;
+    }
+  }
+  &.play-anim{
+    .song_img{
+      animation-play-state:running !important;
     }
   }
   &.clean_player_mode{

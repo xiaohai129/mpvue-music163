@@ -5,6 +5,11 @@ export default {
     this.$store.dispatch('getAudioManager')
     this.$store.dispatch('getTopbarHeight')
     this.$store.dispatch('login')
+    let settings = wx.getStorageSync('settings')
+    if (settings.length <= 0) {
+      wx.setStorageSync('settings', '11')
+    }
+    this.$store.dispatch('getSettings')
   },
   mounted () {
     wx.hideTabBar()

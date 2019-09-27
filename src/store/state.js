@@ -16,5 +16,6 @@ export default {
     songImg: '/static/images/logo.png',
     isPlay: false
   },
-  playList: []
+  playList: [],
+  settings: []
 }

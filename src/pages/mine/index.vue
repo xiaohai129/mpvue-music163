@@ -57,7 +57,7 @@
           >
           </button>
         <div class="list_item" @click="gotoPage($evnet,{url:'/pages/personal/main'})"><i class="iconfont icon-ziliao"></i>我的资料</div>
-        <div class="list_item"><i class="iconfont icon-shezhi"></i>设置中心</div>
+        <div class="list_item" @click="gotoPage($evnet,{url:'/pages/settings/main'})"><i class="iconfont icon-shezhi"></i>系统设置</div>
       </div>
     </div>
     <xhtabbar />

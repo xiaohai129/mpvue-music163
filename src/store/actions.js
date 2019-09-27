@@ -67,5 +67,9 @@ export default {
   },
   setPlayList (context, playList) {
     context.commit(type.SET_PLAYLIST, playList)
+  },
+  getSettings (context) {
+    let settings = wx.getStorageSync('settings')
+    context.commit(type.GET_SETTINGS, settings.split(''))
   }
 }

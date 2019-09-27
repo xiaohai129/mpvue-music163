@@ -26,5 +26,8 @@ export default {
   },
   [type.SET_PLAYLIST] (state, value) {
     state.playList = value
+  },
+  [type.GET_SETTINGS] (state, value) {
+    state.settings = value
   }
 }
